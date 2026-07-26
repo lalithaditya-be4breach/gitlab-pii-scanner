@@ -75,6 +75,30 @@ def _env_path(name: str, default: Path) -> Path:
     return Path(raw).expanduser().resolve() if raw else default
 
 
+def _validate_filename(name: str, variable_name: str) -> str:
+    """
+    Validate an environment-provided filename stays a filename.
+
+    Output paths are joined to configured directories later. This
+    rejects traversal and path input early so configuration fails before
+    the scan starts.
+    """
+    if not name or not name.strip():
+        raise ConfigError(f"{variable_name} must not be empty.")
+
+    filename = name.strip()
+    if ".." in filename:
+        raise ConfigError(f"{variable_name} must not contain '..', got {name!r}.")
+    if "/" in filename or "\\" in filename:
+        raise ConfigError(
+            f"{variable_name} must be a file name only, not a path, got {name!r}."
+        )
+    if Path(filename).is_absolute():
+        raise ConfigError(f"{variable_name} must not be an absolute path, got {name!r}.")
+
+    return filename
+
+
 # ---------------------------------------------------------------------------
 # Supported source file extensions.
 #
@@ -160,6 +184,28 @@ class ScannerSettings:
     clone_base_directory: Path
     clone_shallow_depth: int  # 0 means a full (non-shallow) clone
 
+    # Risk Engine (Task 2, Phase 1: deterministic pipeline gating)
+    risk_warning_threshold: int
+    risk_fail_threshold: int
+
+    # Report Generator (Task 2, Phase 1: structured JSON report)
+    report_output_directory: Path
+    report_redaction_enabled: bool
+
+    # AI Assistant (Task 2, Phase 2: AI-generated summaries only —
+    # never detection, scoring, or pass/fail decisions). All fields
+    # below have defaults so existing code/tests that construct
+    # ScannerSettings without them keep working unchanged.
+    ai_enabled: bool = True
+    ai_provider: str = "null"
+    ai_api_key: str = ""
+    ai_model: str = "gpt-4o-mini"
+    ai_temperature: float = 0.2
+    ai_timeout_seconds: int = 30
+    ai_azure_endpoint: str = ""
+    ai_azure_api_version: str = "2024-08-01-preview"
+    ai_summary_filename: str = "ai-summary.md"
+
     @staticmethod
     def load() -> "ScannerSettings":
         """
@@ -207,6 +253,47 @@ class ScannerSettings:
                 f"cloning), got {clone_shallow_depth}."
             )
 
+        risk_warning_threshold = _env_int("RISK_WARNING_THRESHOLD", 20)
+        risk_fail_threshold = _env_int("RISK_FAIL_THRESHOLD", 50)
+        if risk_warning_threshold < 0 or risk_fail_threshold < 0:
+            raise ConfigError(
+                "RISK_WARNING_THRESHOLD and RISK_FAIL_THRESHOLD must be >= 0, "
+                f"got warning={risk_warning_threshold}, fail={risk_fail_threshold}."
+            )
+        if risk_fail_threshold < risk_warning_threshold:
+            raise ConfigError(
+                "RISK_FAIL_THRESHOLD must be >= RISK_WARNING_THRESHOLD, "
+                f"got warning={risk_warning_threshold}, fail={risk_fail_threshold}."
+            )
+
+        report_output_directory = _env_path(
+            "REPORT_OUTPUT_DIR", output_directory / "reports"
+        )
+        report_redaction_enabled = _env_bool("REPORT_REDACTION_ENABLED", True)
+
+        ai_temperature_raw = os.environ.get("AI_TEMPERATURE", "0.2")
+        try:
+            ai_temperature = float(ai_temperature_raw)
+        except ValueError as exc:
+            raise ConfigError(
+                f"AI_TEMPERATURE must be a float, got {ai_temperature_raw!r}."
+            ) from exc
+        if not (0.0 <= ai_temperature <= 2.0):
+            raise ConfigError(
+                f"AI_TEMPERATURE must be between 0.0 and 2.0, got {ai_temperature}."
+            )
+
+        ai_timeout_seconds = _env_int("AI_TIMEOUT_SECONDS", 30)
+        if ai_timeout_seconds <= 0:
+            raise ConfigError(
+                f"AI_TIMEOUT_SECONDS must be > 0, got {ai_timeout_seconds}."
+            )
+
+        ai_summary_filename = _validate_filename(
+            _env_str("AI_SUMMARY_FILENAME", "ai-summary.md"),
+            "AI_SUMMARY_FILENAME",
+        )
+
         return ScannerSettings(
             app_name=_env_str("SCANNER_APP_NAME", "gitlab-pii-scanner"),
             environment=_env_str("SCANNER_ENVIRONMENT", "local"),
@@ -223,6 +310,19 @@ class ScannerSettings:
             presidio_spacy_model=_env_str("PRESIDIO_SPACY_MODEL", "en_core_web_lg"),
             clone_base_directory=clone_base_directory,
             clone_shallow_depth=clone_shallow_depth,
+            risk_warning_threshold=risk_warning_threshold,
+            risk_fail_threshold=risk_fail_threshold,
+            report_output_directory=report_output_directory,
+            report_redaction_enabled=report_redaction_enabled,
+            ai_enabled=_env_bool("AI_ENABLED", True),
+            ai_provider=_env_str("AI_PROVIDER", "null"),
+            ai_api_key=_env_str("AI_API_KEY", ""),
+            ai_model=_env_str("AI_MODEL", "gpt-4o-mini"),
+            ai_temperature=ai_temperature,
+            ai_timeout_seconds=ai_timeout_seconds,
+            ai_azure_endpoint=_env_str("AI_AZURE_ENDPOINT", ""),
+            ai_azure_api_version=_env_str("AI_AZURE_API_VERSION", "2024-08-01-preview"),
+            ai_summary_filename=ai_summary_filename,
         )
 
 

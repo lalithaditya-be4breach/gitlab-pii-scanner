@@ -42,6 +42,10 @@ def _build_test_settings(tmp_path: Path) -> ScannerSettings:
         presidio_spacy_model="en_core_web_lg",
         clone_base_directory=output_directory / "cloned_repositories",
         clone_shallow_depth=1,
+        risk_warning_threshold=20,
+        risk_fail_threshold=50,
+        report_output_directory=output_directory / "reports",
+        report_redaction_enabled=True,
     )
 
 

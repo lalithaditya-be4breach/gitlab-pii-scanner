@@ -31,6 +31,18 @@ class Severity(str, Enum):
     CRITICAL = "CRITICAL"
 
 
+class PipelineStatus(str, Enum):
+    """
+    Deterministic repository-level outcome produced by the Risk Engine
+    (Task 2, Phase 1). This is the single value a future Azure DevOps
+    pipeline gate reads to decide whether a build passes.
+    """
+
+    PASS = "PASS"
+    WARNING = "WARNING"
+    FAIL = "FAIL"
+
+
 class RepositorySourceType(str, Enum):
     """Where the scanned code originated from."""
 
@@ -119,3 +131,20 @@ class ScanSummary:
         if self.finished_at is None:
             return None
         return (self.finished_at - self.started_at).total_seconds()
+
+
+@dataclass(frozen=True, slots=True)
+class RiskAssessment:
+    """
+    Deterministic, repeatable risk output for a completed `ScanSummary`.
+
+    Produced by `scanner.risk_engine.RiskEngine`. Contains no AI or
+    machine-learning output by design (see Task 2, Phase 1): the same
+    severity counts and thresholds always produce the same result.
+    """
+
+    risk_score: int
+    status: PipelineStatus
+    severity_counts: dict[Severity, int]
+    warning_threshold: int
+    fail_threshold: int

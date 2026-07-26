@@ -4,8 +4,8 @@ main.py
 
 Command-line entry point for the GitLab PII Scanner.
 
-Phase 3 scope
--------------
+Phase 3 scope (Task 1) + Task 2, Phase 1
+-----------------------------------------
 This entry point currently:
     1. Parses CLI arguments for the two scan modes (`local` and `gitlab`).
     2. Loads and validates application configuration (`scanner.config`).
@@ -16,8 +16,17 @@ This entry point currently:
     5. Uses `ScanEngine` (Phase 3) to traverse the repository and run
        Microsoft Presidio over every in-scope file, then prints a
        findings summary.
-    6. Report generation (CSV/HTML) is not yet implemented — it
-       arrives in Phase 4.
+    6. Uses `RiskEngine` (Task 2, Phase 1) to deterministically score
+       the scan's severity counts into a `PASS`/`WARNING`/`FAIL`
+       pipeline status.
+    7. Uses `ReportGenerator` (Task 2, Phase 1) to write a versioned,
+       redacted JSON report to `report_output_directory` — the stable
+       contract later phases (AI assistant, Azure DevOps) consume.
+    8. Uses `AIAssistant` (Task 2, Phase 2) to consume that JSON report
+       and write a developer/management-friendly Markdown summary
+       (`ai-summary.md`) alongside it. The AI layer never changes a
+       finding, a risk score, or the pipeline status, and its failure
+       never aborts the scan.
 
 Nothing here reaches into the `presidio` reference repository; Phase 3
 consumes Presidio exclusively as the installed `presidio-analyzer`
@@ -35,6 +44,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from scanner.ai import AIAssistant
 from scanner.config import ConfigError, get_settings
 from scanner.logger import configure_logging, get_logger
 from scanner.pii_detector import PIIDetectorError
@@ -45,6 +55,8 @@ from scanner.repository_manager import (
     RepositoryManagerError,
     RepositoryNotFound,
 )
+from scanner.report_generator import ReportGenerator
+from scanner.risk_engine import RiskEngine
 from scanner.scan_engine import ScanEngine
 from scanner.utils import ensure_directory
 
@@ -60,6 +72,7 @@ class ExitCode:
     INVALID_REPOSITORY_URL = 5
     CLONE_FAILED = 6
     SCAN_ENGINE_ERROR = 7
+    REPORT_WRITE_ERROR = 8
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -94,6 +107,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         "local", help="Scan a repository that already exists on the local disk."
     )
     local_parser.add_argument(
+        "--no-file-log",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
+    local_parser.add_argument(
         "--path",
         type=Path,
         required=True,
@@ -103,6 +121,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
     gitlab_parser = subparsers.add_parser(
         "gitlab",
         help="Clone a GitLab repository, then scan it (cloning added in a later phase).",
+    )
+    gitlab_parser.add_argument(
+        "--no-file-log",
+        action="store_true",
+        help=argparse.SUPPRESS,
     )
     gitlab_parser.add_argument(
         "--url",
@@ -201,9 +224,40 @@ def run(argv: list[str] | None = None) -> int:
     summary = scan_engine.scan(repository)
     _log_summary(logger, summary)
 
+    risk_engine = RiskEngine(settings=settings)
+    risk_assessment = risk_engine.assess(summary)
+
+    report_generator = ReportGenerator(settings=settings)
+    try:
+        report, report_path = report_generator.generate(summary, risk_assessment)
+    except OSError as exc:
+        logger.error("Failed to write the JSON scan report: %s", exc)
+        return ExitCode.REPORT_WRITE_ERROR
+
     logger.info(
-        "Phase 3 complete. Report generation (CSV/HTML) is implemented "
-        "in the next phase."
+        "Pipeline status: %s (risk score=%d, warning>=%d, fail>=%d)",
+        risk_assessment.status.value,
+        risk_assessment.risk_score,
+        risk_assessment.warning_threshold,
+        risk_assessment.fail_threshold,
+    )
+    logger.info("Structured JSON report: %s", report_path)
+
+    # Task 2, Phase 2: AI Assistant. Always the final pipeline layer,
+    # consuming only the JSON report above. AI failures (disabled,
+    # missing API key, timeout, invalid response, unknown provider)
+    # never abort the scan or change `risk_assessment.status` — this
+    # is guaranteed by `AIAssistant` itself, and defended again here.
+    try:
+        _ai_markdown, ai_summary_path = AIAssistant(settings=settings).generate(report)
+        logger.info("AI-assisted summary: %s", ai_summary_path)
+    except Exception as exc:  # noqa: BLE001 - AI must never abort the scan
+        logger.warning("AI summary generation failed unexpectedly: %s", exc)
+
+    logger.info(
+        "Task 2 Phase 2 complete (AI-assisted summaries on top of the "
+        "Phase 1 reporting + deterministic risk engine). Azure DevOps "
+        "integration follows in a later phase."
     )
     return ExitCode.SUCCESS
 

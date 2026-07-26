@@ -16,6 +16,13 @@ GitPython==3.1.43
 presidio-analyzer==2.2.364
 spacy>=3.4.4,!=3.7.0,<4.0.0
 
+# -- Task 2, Phase 2: AI Assistant (optional) --
+# Only required if AI_PROVIDER is set to "openai" or "azure_openai".
+# The scanner runs fully without it (AI_PROVIDER defaults to "null",
+# which uses a deterministic fallback summary and never imports this
+# package).
+openai>=1.30.0,<2.0.0
+
 # -- Development / testing only --
 pytest==8.3.3
 
