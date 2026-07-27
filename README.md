@@ -266,7 +266,143 @@ access is available.
 **Task 2 — AI-Assisted DevSecOps Pipeline on Azure DevOps**
 - [x] **Phase 1** — Reporting foundation + deterministic risk engine (this phase)
 - [x] **Phase 2** — AI assistant (explanations/remediation only; never detects PII or decides pipeline status)
-- [ ] **Phase 3** — Azure DevOps pipeline integration (YAML, artifacts, build gating)
+- [x] **Phase 3** — Azure DevOps pipeline integration (YAML, artifacts, build gating)
+
+## Phase 3 – Azure DevOps Integration
+
+Task 2, Phase 3 turns Azure DevOps into the pipeline **orchestrator**
+for the scanner that already exists — it does not change the scanner
+itself. Azure DevOps checks out the repo, runs the existing CLI, and
+then reads the JSON report the scanner already produces:
+
+```
+Developer Push
+      |
+Azure DevOps Pipeline
+      |
+Checkout Repository -> Setup Python -> Install Dependencies
+      |
+Run Existing Scanner (python main.py local --path ...)
+      |
+JSON Report + AI Markdown Summary (unchanged scanner output)
+      |
+ci/evaluate_gate.py reads summary.pipeline_status ONLY
+      |
+Pipeline PASS / WARNING / FAIL
+      |
+Publish Artifacts
+```
+
+**Architecture rule, unchanged from Phases 1–2:** `RiskEngine` is the
+only component that ever computes `pipeline_status`. Azure DevOps
+never recomputes risk and never inspects individual findings — it
+only reads the one field the scanner already decided.
+
+### Pipeline flow (`azure-pipelines.yml`)
+
+Defined at the repository root, the pipeline:
+
+1. Checks out the repository.
+2. Provisions Python via `UsePythonVersion@0` and caches pip packages
+   (`Cache@2`, keyed on `requirements.txt`).
+3. Installs `requirements.txt`, then downloads the spaCy model
+   Presidio needs (`PRESIDIO_SPACY_MODEL`, default `en_core_web_lg`).
+4. Runs the **existing, unmodified CLI**:
+   `python main.py local --path "$(Build.SourcesDirectory)"`. If the
+   scanner itself fails (non-zero exit from an unrelated cause, e.g. a
+   Presidio initialization error), the step — and therefore the
+   pipeline — fails immediately, before the gate step ever runs.
+5. Runs `ci/evaluate_gate.py`, which reads `summary.pipeline_status`
+   from the JSON report and gates the build (see below).
+6. Publishes the JSON report and AI Markdown summary as pipeline
+   artifacts (`condition: always()`, so they're published even when
+   the gate step fails, for post-mortem review).
+
+### `ci/evaluate_gate.py`
+
+A small, dependency-free (standard-library only) helper script — the
+*only* new code that runs after the scanner in Phase 3:
+
+- Reads `summary.pipeline_status` from the JSON report
+  (`output/reports/latest.json` by default; override with
+  `--report-path`).
+- **Never** recomputes risk, never inspects `findings`, never
+  duplicates any `RiskEngine` logic — it only reads a field that
+  already exists in the report.
+- Translates the status into Azure DevOps [logging
+  commands](https://learn.microsoft.com/azure/devops/pipelines/scripts/logging-commands):
+
+  | `pipeline_status` | Azure DevOps result      | Build outcome              |
+  |-------------------|--------------------------|-----------------------------|
+  | `PASS`            | `Succeeded`              | Build continues normally    |
+  | `WARNING`         | `SucceededWithIssues`    | Build continues, flagged    |
+  | `FAIL`            | `Failed`                 | Build is gated/blocked      |
+
+- **Fails closed:** if the report file is missing, isn't valid JSON,
+  or has no recognizable `summary.pipeline_status`, the script treats
+  this the same as `FAIL` (exit code `1`) rather than silently letting
+  the build pass. This is deliberate — an unreadable gate should never
+  be mistaken for a passing one.
+- Has isolated unit tests in `tests/test_evaluate_gate.py` that never
+  import `scanner` — only hand-written report fixtures — since the
+  whole point of this script is that it has no dependency on the
+  scanner's internals beyond the JSON contract.
+
+### Artifacts published
+
+| Artifact name         | Source file                        |
+|------------------------|-------------------------------------|
+| `pii-scan-report`      | `output/reports/latest.json`        |
+| `pii-scan-ai-summary`  | `output/ai-summary.md`              |
+
+No additional report formats are introduced in this phase.
+
+### Variables
+
+The pipeline sets sane CI defaults for existing `ScannerSettings`
+environment variables (see **Configuration** above) — it does not
+introduce a second configuration system. Any of these can be
+overridden at the pipeline, stage, or variable-group level without
+touching `azure-pipelines.yml`:
+
+| Variable                  | Set in the pipeline as | Purpose                                    |
+|----------------------------|--------------------------|---------------------------------------------|
+| `SCANNER_ENVIRONMENT`      | `ci`                     | Environment label in logs                   |
+| `SCANNER_OUTPUT_DIR`       | `$(Build.SourcesDirectory)/output` | Where reports/logs land, so artifact paths are predictable |
+| `PRESIDIO_SPACY_MODEL`     | `en_core_web_lg`         | Model downloaded before the scan runs        |
+| `RISK_WARNING_THRESHOLD`   | `20`                     | Same `RiskEngine` threshold as local runs    |
+| `RISK_FAIL_THRESHOLD`      | `50`                     | Same `RiskEngine` threshold as local runs    |
+| `REPORT_REDACTION_ENABLED` | `true`                   | Findings stay redacted in the published artifact |
+| `AI_PROVIDER`              | `null`                   | No AI network calls unless explicitly enabled |
+| `AI_MODEL`                 | `gpt-4o-mini`            | Model/deployment name if AI is enabled       |
+
+### Secrets
+
+Never hardcoded in `azure-pipelines.yml` or anywhere else: API keys,
+Git credentials, Azure endpoints. `AI_API_KEY` and `AI_AZURE_ENDPOINT`
+are passed into the scan step from Azure DevOps **secret variables**
+(pipeline variables marked "secret", or a linked variable group /
+Azure Key Vault). Set `AI_PROVIDER=openai` or `AI_PROVIDER=azure_openai`
+plus the corresponding secret(s) only when a real AI-written executive
+summary is desired; the pipeline runs correctly with none of them set.
+
+### How to run inside Azure DevOps
+
+1. Import/point an Azure DevOps pipeline at this repository; it will
+   auto-discover `azure-pipelines.yml` at the root.
+2. (Optional) Add `AI_API_KEY` / `AI_AZURE_ENDPOINT` as secret
+   variables or in a linked variable group if AI summaries beyond the
+   deterministic fallback are wanted.
+3. Push to `main` (or open a PR against it) — the pipeline runs
+   automatically per the `trigger`/`pr` sections above.
+4. Check the pipeline run's **Artifacts** tab for `pii-scan-report`
+   and `pii-scan-ai-summary`; check the run summary for the gate
+   result (`Succeeded` / `SucceededWithIssues` / `Failed`).
+
+**Note:** the scanner CLI's own process exit code is still always `0`
+on a successful scan (unchanged from Phase 1/2, preserving existing
+CLI behavior and tests). Build gating in Azure DevOps comes entirely
+from `ci/evaluate_gate.py`'s exit code, not from `main.py`'s.
 
 ## Design principles
 
