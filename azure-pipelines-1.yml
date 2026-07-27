@@ -6,6 +6,8 @@ pool:
 steps:
 - checkout: self
 
-- script: |
-    echo "Repository checkout succeeded."
-  displayName: "Checkout Test"
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: "3.11"
+
+- script: python --version
