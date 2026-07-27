@@ -3,7 +3,8 @@
 # Azure DevOps CI pipeline for the GitLab PII Scanner.
 #
 # Azure DevOps orchestrates the workflow only.
-# Detection, risk scoring and reporting remain inside the scanner.
+# Detection, risk scoring, AI reporting and report generation remain
+# inside the scanner.
 
 trigger:
   branches:
@@ -36,9 +37,9 @@ variables:
 
 steps:
 
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 # Python
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 
 - task: UsePythonVersion@0
   displayName: "Use Python $(pythonVersion)"
@@ -46,9 +47,9 @@ steps:
     versionSpec: "$(pythonVersion)"
     addToPath: true
 
-# ------------------------------------------------------------------
-# Cache
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
+# Cache pip packages
+# ----------------------------------------------------------
 
 - task: Cache@2
   displayName: "Cache pip packages"
@@ -58,9 +59,9 @@ steps:
       python | "$(Agent.OS)"
     path: "$(Pipeline.Workspace)/.pip-cache"
 
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 # Install dependencies
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 
 - script: |
     python -m pip install --upgrade pip
@@ -69,65 +70,44 @@ steps:
       -r requirements.txt
   displayName: "Install dependencies"
 
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 # Download spaCy model
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 
 - script: |
     python -m spacy download "$(PRESIDIO_SPACY_MODEL)"
   displayName: "Download spaCy model"
 
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 # Run unit tests
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 
 - script: |
     pytest -rs
   displayName: "Run unit tests"
 
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 # Execute scanner
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 
 - script: |
-    set -e
-
-    echo "=============================================="
-    echo "Running scanner..."
-    echo "=============================================="
-
     python main.py local --path "$(Build.SourcesDirectory)"
-
-    echo ""
-    echo "=============================================="
-    echo "Scanner finished successfully"
-    echo "=============================================="
-
-    echo ""
-    echo "Searching for ALL generated reports..."
-    find "$(Build.SourcesDirectory)" -type f | grep -Ei \
-      "scan_report.json|dashboard.json|AI_Summary.md|Developer_Guidance.md|Executive_Report.html|Dashboard.html" || true
-
-    echo ""
-    echo "Searching for report directories..."
-    find "$(Build.SourcesDirectory)" -type d | grep -Ei \
-      "reports|output" || true
   displayName: "Run GitLab PII Scanner"
   env:
     AI_API_KEY: $(AI_API_KEY)
     AI_AZURE_ENDPOINT: $(AI_AZURE_ENDPOINT)
 
-# ------------------------------------------------------------------
-# Evaluate gate
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
+# Evaluate pipeline gate
+# ----------------------------------------------------------
 
 - script: |
     python ci/evaluate_gate.py --report-path "$(Build.SourcesDirectory)/reports/latest/scan_report.json"
   displayName: "Evaluate Security Gate"
 
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 # Publish reports
-# ------------------------------------------------------------------
+# ----------------------------------------------------------
 
 - task: PublishPipelineArtifact@1
   displayName: "Publish Reports"
