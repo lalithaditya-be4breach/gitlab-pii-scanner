@@ -90,40 +90,32 @@ steps:
 # ------------------------------------------------------------------
 
 - script: |
+    set -e
+
+    echo "=============================================="
+    echo "Running scanner..."
+    echo "=============================================="
+
     python main.py local --path "$(Build.SourcesDirectory)"
+
+    echo ""
+    echo "=============================================="
+    echo "Scanner finished successfully"
+    echo "=============================================="
+
+    echo ""
+    echo "Searching for ALL generated reports..."
+    find "$(Build.SourcesDirectory)" -type f | grep -Ei \
+      "scan_report.json|dashboard.json|AI_Summary.md|Developer_Guidance.md|Executive_Report.html|Dashboard.html" || true
+
+    echo ""
+    echo "Searching for report directories..."
+    find "$(Build.SourcesDirectory)" -type d | grep -Ei \
+      "reports|output" || true
   displayName: "Run GitLab PII Scanner"
   env:
     AI_API_KEY: $(AI_API_KEY)
     AI_AZURE_ENDPOINT: $(AI_AZURE_ENDPOINT)
-
-# ------------------------------------------------------------------
-# DEBUG (Temporary)
-# ------------------------------------------------------------------
-
-- script: |
-    echo "===================================================="
-    echo "Current working directory"
-    echo "===================================================="
-    pwd
-
-    echo ""
-    echo "===================================================="
-    echo "Searching for scan_report.json"
-    echo "===================================================="
-    find "$(Build.SourcesDirectory)" -type f -name "scan_report.json"
-
-    echo ""
-    echo "===================================================="
-    echo "Searching for reports directories"
-    echo "===================================================="
-    find "$(Build.SourcesDirectory)" -type d -name "reports"
-
-    echo ""
-    echo "===================================================="
-    echo "Complete directory tree (depth 3)"
-    echo "===================================================="
-    find "$(Build.SourcesDirectory)" -maxdepth 3
-  displayName: "Debug Report Location"
 
 # ------------------------------------------------------------------
 # Evaluate gate
