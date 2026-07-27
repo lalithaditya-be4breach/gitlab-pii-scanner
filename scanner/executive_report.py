@@ -42,6 +42,12 @@ def _read_text(path: Path | None) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def _read_bytes(path: Path | None) -> bytes | None:
+    if path is None or not path.is_file():
+        return None
+    return path.read_bytes()
+
+
 def _copy_if_exists(source: Path | None, destination: Path) -> None:
     if source is not None and source.is_file():
         shutil.copy2(source, destination)
@@ -226,21 +232,33 @@ class ExecutiveReportPackage:
         now: datetime | None = None,
     ) -> Path:
         root = self._settings.working_directory
+
+        # IMPORTANT: scan_report_path / ai_summary_path / developer_guidance_path /
+        # dashboard_json_path frequently point *inside* reports/latest/ -- they
+        # are the files Phase 1/2/4 already wrote there. _latest_directory()
+        # below wipes that directory with shutil.rmtree before rebuilding it,
+        # so every input must be captured in memory first; reading them (or
+        # copying them) after the wipe would silently find nothing there and
+        # every _copy_if_exists() call would become a no-op.
+        scan_report_bytes = _read_bytes(scan_report_path)
+        ai_summary = _read_text(ai_summary_path)
+        developer_guidance = _read_text(developer_guidance_path)
+        dashboard_json_text = _read_text(dashboard_json_path)
+        dashboard = json.loads(dashboard_json_text) if dashboard_json_text else {}
+
         latest_dir = _latest_directory(root)
         report_dir = _existing_history_directory_for_scan(root, scan_report)
         if report_dir is None:
             report_dir = _next_report_directory(root, now or datetime.now())
 
-        _copy_if_exists(scan_report_path, latest_dir / "scan_report.json")
-        _copy_if_exists(ai_summary_path, latest_dir / "AI_Summary.md")
-        _copy_if_exists(developer_guidance_path, latest_dir / "Developer_Guidance.md")
-        _copy_if_exists(dashboard_json_path, latest_dir / "dashboard.json")
-
-        ai_summary = _read_text(ai_summary_path)
-        developer_guidance = _read_text(developer_guidance_path)
-        dashboard = {}
-        if dashboard_json_path is not None and dashboard_json_path.is_file():
-            dashboard = json.loads(dashboard_json_path.read_text(encoding="utf-8"))
+        if scan_report_bytes is not None:
+            (latest_dir / "scan_report.json").write_bytes(scan_report_bytes)
+        if ai_summary:
+            (latest_dir / "AI_Summary.md").write_text(ai_summary, encoding="utf-8")
+        if developer_guidance:
+            (latest_dir / "Developer_Guidance.md").write_text(developer_guidance, encoding="utf-8")
+        if dashboard_json_text:
+            (latest_dir / "dashboard.json").write_text(dashboard_json_text, encoding="utf-8")
 
         (latest_dir / "Executive_Report.html").write_text(
             self._render_executive_html(scan_report, dashboard, ai_summary),
