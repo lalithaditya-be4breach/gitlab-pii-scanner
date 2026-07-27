@@ -1,19 +1,9 @@
 # azure-pipelines.yml
-# ====================
 #
-# Task 2, Phase 3: Azure DevOps integration for the GitLab PII Scanner.
+# Azure DevOps CI pipeline for the GitLab PII Scanner.
 #
-# Azure DevOps is the ORCHESTRATOR only. It never detects PII, never
-# recomputes risk, and never overrides a pipeline decision:
-#
-#   Checkout -> Setup Python -> Install deps -> Run existing scanner
-#     -> JSON report + AI markdown summary (produced by the scanner,
-#        unchanged) -> ci/evaluate_gate.py reads summary.pipeline_status
-#     -> pipeline PASS / WARNING / FAIL -> publish artifacts
-#
-# Nothing here re-implements RiskEngine or PIIDetector logic. This file
-# only calls the scanner's existing CLI (`python main.py ...`) and then
-# a small stdlib-only helper script that reads the report it produced.
+# Azure DevOps orchestrates the workflow only.
+# Detection, risk scoring and reporting remain inside the scanner.
 
 trigger:
   branches:
@@ -30,82 +20,99 @@ pool:
   vmImage: "ubuntu-latest"
 
 variables:
-  # Which Python interpreter to provision on the agent.
   pythonVersion: "3.11"
 
-  # ---------------------------------------------------------------------
-  # ScannerSettings environment variables (scanner/config.py).
-  # These are read directly by the existing scanner CLI -- no second
-  # configuration system is introduced here. Override any of these at
-  # the pipeline/stage/variable-group level as needed; nothing below
-  # needs to change for that.
-  # ---------------------------------------------------------------------
+  # Scanner configuration
   SCANNER_ENVIRONMENT: "ci"
-  SCANNER_OUTPUT_DIR: "$(Build.SourcesDirectory)/output"
+  SCANNER_OUTPUT_DIR: "$(Build.SourcesDirectory)"
   PRESIDIO_SPACY_MODEL: "en_core_web_lg"
   RISK_WARNING_THRESHOLD: "20"
   RISK_FAIL_THRESHOLD: "50"
   REPORT_REDACTION_ENABLED: "true"
 
-  # AI Assistant configuration (Task 2, Phase 2). Defaults to the
-  # deterministic "null" provider, which makes no network calls and
-  # requires no secret. Set AI_PROVIDER to "openai" or "azure_openai"
-  # (via a variable group / pipeline UI override) and supply
-  # AI_API_KEY as an Azure DevOps *secret* variable to enable a real
-  # AI-written executive summary.
+  # AI configuration
   AI_PROVIDER: "null"
   AI_MODEL: "gpt-4o-mini"
 
 steps:
-  - task: UsePythonVersion@0
-    displayName: "Set up Python $(pythonVersion)"
-    inputs:
-      versionSpec: "$(pythonVersion)"
-      addToPath: true
 
-  - task: Cache@2
-    displayName: "Cache pip packages"
-    inputs:
-      key: 'python | "$(Agent.OS)" | requirements.txt'
-      restoreKeys: |
-        python | "$(Agent.OS)"
-      path: "$(Pipeline.Workspace)/.pip-cache"
+# ------------------------------------------------------------------
+# Python
+# ------------------------------------------------------------------
 
-  - script: |
-      set -e
-      python -m pip install --upgrade pip
-      pip install --cache-dir "$(Pipeline.Workspace)/.pip-cache" -r requirements.txt
-    displayName: "Install dependencies"
+- task: UsePythonVersion@0
+  displayName: "Use Python $(pythonVersion)"
+  inputs:
+    versionSpec: "$(pythonVersion)"
+    addToPath: true
 
-  - script: |
-      set -e
-      python -m spacy download "$PRESIDIO_SPACY_MODEL"
-    displayName: "Download spaCy model ($(PRESIDIO_SPACY_MODEL))"
+# ------------------------------------------------------------------
+# Cache
+# ------------------------------------------------------------------
 
-  - script: |
-      set -e
-      python main.py local --path "$(Build.SourcesDirectory)"
-    displayName: "Run PII scanner (existing CLI, unchanged)"
-    env:
-      # Secrets: never hardcoded. Map from Azure DevOps secret
-      # variables / a variable group. AI_API_KEY is empty by default,
-      # which is fine -- AI_PROVIDER=null never reads it.
-      AI_API_KEY: $(AI_API_KEY)
-      AI_AZURE_ENDPOINT: $(AI_AZURE_ENDPOINT)
+- task: Cache@2
+  displayName: "Cache pip packages"
+  inputs:
+    key: 'python | "$(Agent.OS)" | requirements.txt'
+    restoreKeys: |
+      python | "$(Agent.OS)"
+    path: "$(Pipeline.Workspace)/.pip-cache"
 
-  - script: |
-      set -e
-      python ci/evaluate_gate.py --report-path "$(Build.SourcesDirectory)/reports/latest/scan_report.json"
-    displayName: "Evaluate pipeline gate (reads summary.pipeline_status only)"
+# ------------------------------------------------------------------
+# Install dependencies
+# ------------------------------------------------------------------
 
-  - task: PublishPipelineArtifact@1
-    displayName: "Publish report package"
-    condition: always()
-    inputs:
+- script: |
+    python -m pip install --upgrade pip
+    pip install \
+      --cache-dir "$(Pipeline.Workspace)/.pip-cache" \
+      -r requirements.txt
+  displayName: "Install dependencies"
 
-    - task: PublishPipelineArtifact@1
-    displayName: "Publish report package"
-    condition: always()
-    inputs:
-      targetPath: "$(Build.SourcesDirectory)/reports"
-      artifact: "pii-scan-reports"
+# ------------------------------------------------------------------
+# Download Presidio model
+# ------------------------------------------------------------------
+
+- script: |
+    python -m spacy download "$(PRESIDIO_SPACY_MODEL)"
+  displayName: "Download spaCy model"
+
+# ------------------------------------------------------------------
+# Run unit tests
+# ------------------------------------------------------------------
+
+- script: |
+    pytest -rs
+  displayName: "Run unit tests"
+
+# ------------------------------------------------------------------
+# Execute scanner
+# ------------------------------------------------------------------
+
+- script: |
+    python main.py local --path "$(Build.SourcesDirectory)"
+  displayName: "Run GitLab PII Scanner"
+
+  env:
+    AI_API_KEY: $(AI_API_KEY)
+    AI_AZURE_ENDPOINT: $(AI_AZURE_ENDPOINT)
+
+# ------------------------------------------------------------------
+# Evaluate gate
+# ------------------------------------------------------------------
+
+- script: |
+    python ci/evaluate_gate.py --report-path "$(Build.SourcesDirectory)/reports/latest/scan_report.json"
+  displayName: "Evaluate Security Gate"
+
+# ------------------------------------------------------------------
+# Publish reports
+# ------------------------------------------------------------------
+
+- task: PublishPipelineArtifact@1
+  displayName: "Publish Reports"
+  condition: always()
+
+  inputs:
+    targetPath: "$(Build.SourcesDirectory)/reports"
+    artifact: "pii-scan-reports"
