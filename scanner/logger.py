@@ -30,6 +30,20 @@ _LOGGER_NAME = "gitlab_pii_scanner"
 _configured = False
 
 
+class _WindowsSafeRotatingFileHandler(logging.handlers.RotatingFileHandler):
+    """Rotating handler that keeps logging if Windows refuses a rollover rename."""
+
+    def doRollover(self) -> None:  # noqa: N802 - logging API name
+        try:
+            super().doRollover()
+        except PermissionError:
+            if self.stream:
+                self.stream.close()
+                self.stream = None
+            self.mode = "a"
+            self.stream = self._open()
+
+
 def configure_logging(*, log_to_file: bool = True) -> logging.Logger:
     """
     Configure and return the application's root logger.
@@ -69,7 +83,7 @@ def configure_logging(*, log_to_file: bool = True) -> logging.Logger:
         log_directory.mkdir(parents=True, exist_ok=True)
         log_file_path = log_directory / "scanner.log"
 
-        file_handler = logging.handlers.RotatingFileHandler(
+        file_handler = _WindowsSafeRotatingFileHandler(
             filename=log_file_path,
             maxBytes=2 * 1024 * 1024,  # 2 MB per file
             backupCount=5,

@@ -46,6 +46,8 @@ from pathlib import Path
 
 from scanner.ai import AIAssistant
 from scanner.config import ConfigError, get_settings
+from scanner.executive_report import ExecutiveReportPackage
+from scanner.intelligence import IntelligenceEngine
 from scanner.logger import configure_logging, get_logger
 from scanner.pii_detector import PIIDetectorError
 from scanner.repository_manager import (
@@ -248,16 +250,48 @@ def run(argv: list[str] | None = None) -> int:
     # missing API key, timeout, invalid response, unknown provider)
     # never abort the scan or change `risk_assessment.status` — this
     # is guaranteed by `AIAssistant` itself, and defended again here.
+    ai_summary_path: Path | None = None
     try:
         _ai_markdown, ai_summary_path = AIAssistant(settings=settings).generate(report)
         logger.info("AI-assisted summary: %s", ai_summary_path)
     except Exception as exc:  # noqa: BLE001 - AI must never abort the scan
         logger.warning("AI summary generation failed unexpectedly: %s", exc)
 
+    # Task 2, Phase 4: AI-Assisted DevSecOps Intelligence Layer. Consumes
+    # only the JSON report above (never re-runs Presidio/RiskEngine) and
+    # writes developer-guidance.md, dashboard.json, and the trend
+    # snapshot under output/intelligence/. Like the AI Assistant above,
+    # a Phase 4 failure never aborts the scan or changes the pipeline
+    # status -- this is guaranteed by `IntelligenceEngine` itself, and
+    # defended again here.
+    intelligence_artifacts: dict[str, Path] = {}
+    try:
+        intelligence_artifacts = IntelligenceEngine(settings=settings).generate_all(report)
+        for name, path in intelligence_artifacts.items():
+            logger.info("Intelligence layer artifact (%s): %s", name, path)
+    except Exception as exc:  # noqa: BLE001 - Phase 4 must never abort the scan
+        logger.warning("Intelligence layer generation failed unexpectedly: %s", exc)
+
+    # Human-readable reporting package. This consumes only artifacts
+    # already produced above and writes a separate demonstration folder
+    # under reports/. It never changes JSON schemas, risk decisions, or
+    # pipeline status, and a packaging failure must not fail a scan.
+    try:
+        executive_report_path = ExecutiveReportPackage(settings=settings).generate(
+            scan_report=report,
+            scan_report_path=report_path,
+            ai_summary_path=ai_summary_path,
+            developer_guidance_path=intelligence_artifacts.get("developer_guidance"),
+            dashboard_json_path=intelligence_artifacts.get("dashboard"),
+        )
+        logger.info("Executive report package: %s", executive_report_path)
+    except Exception as exc:  # noqa: BLE001 - human report packaging must not abort scan
+        logger.warning("Executive report package generation failed: %s", exc)
+
     logger.info(
-        "Task 2 Phase 2 complete (AI-assisted summaries on top of the "
-        "Phase 1 reporting + deterministic risk engine). Azure DevOps "
-        "integration follows in a later phase."
+        "Task 2 Phase 4 complete (AI-Assisted DevSecOps Intelligence "
+        "Layer on top of the Phase 1 reporting + deterministic risk "
+        "engine and the Phase 2 AI Assistant)."
     )
     return ExitCode.SUCCESS
 

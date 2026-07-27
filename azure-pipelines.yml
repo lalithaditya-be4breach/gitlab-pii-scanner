@@ -95,19 +95,17 @@ steps:
 
   - script: |
       set -e
-      python ci/evaluate_gate.py --report-path "$(SCANNER_OUTPUT_DIR)/reports/latest.json"
+      python ci/evaluate_gate.py --report-path "$(Build.SourcesDirectory)/reports/latest/scan_report.json"
     displayName: "Evaluate pipeline gate (reads summary.pipeline_status only)"
 
   - task: PublishPipelineArtifact@1
-    displayName: "Publish JSON report"
+    displayName: "Publish report package"
     condition: always()
     inputs:
-      targetPath: "$(SCANNER_OUTPUT_DIR)/reports/latest.json"
-      artifact: "pii-scan-report"
 
-  - task: PublishPipelineArtifact@1
-    displayName: "Publish AI markdown summary"
+    - task: PublishPipelineArtifact@1
+    displayName: "Publish report package"
     condition: always()
     inputs:
-      targetPath: "$(SCANNER_OUTPUT_DIR)/ai-summary.md"
-      artifact: "pii-scan-ai-summary"
+      targetPath: "$(Build.SourcesDirectory)/reports"
+      artifact: "pii-scan-reports"

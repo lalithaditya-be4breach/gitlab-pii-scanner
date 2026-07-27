@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PII Security Dashboard</title>
+  <style>
+:root{--bg:#f4f7fb;--surface:#fff;--ink:#172033;--muted:#637083;--line:#d9e1ec;--accent:#2563eb;--pass:#15803d;--warn:#b45309;--fail:#b91c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Segoe UI,Arial,sans-serif}main{max-width:1180px;margin:0 auto;padding:28px}
+.hero{display:flex;justify-content:space-between;gap:24px;align-items:center;background:linear-gradient(135deg,#152238,#244a77);color:#fff;border-radius:8px;padding:34px;margin-bottom:18px}.hero.compact{padding:26px}.eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:#b9d4ff;margin:0 0 10px}h1{font-size:34px;margin:0 0 10px}h2{margin:0 0 16px;font-size:20px}h3{margin:8px 0 10px}.scorecard{text-align:center;min-width:170px}.scorecard strong{display:block;font-size:54px;line-height:1}.badge{display:inline-block;border-radius:999px;padding:8px 14px;font-weight:700;background:#64748b;color:#fff}.badge.pass,.release.pass h3{background:var(--pass)}.badge.warning,.release.warning h3{background:var(--warn)}.badge.fail,.release.fail h3{background:var(--fail)}
+.meta,.metrics,.grid{display:grid;gap:14px;margin-bottom:18px}.meta{grid-template-columns:repeat(4,1fr)}.metrics{grid-template-columns:repeat(7,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.meta div,.metric,.panel,.release{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}.meta span,.metric span{display:block;color:var(--muted);font-size:13px}.metric strong{font-size:28px}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;color:var(--muted)}canvas{width:100%;height:260px}pre{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);padding:12px;border-radius:6px}.release h3{display:inline-block;color:#fff;border-radius:6px;padding:8px 12px}.release p{font-size:16px}
+@media(max-width:850px){main{padding:16px}.hero{display:block}.meta,.metrics,.grid{grid-template-columns:1fr}.scorecard{text-align:left;margin-top:20px}}
+</style>
+</head>
+<body>
+  <main>
+<section class="hero compact">
+  <div><p class="eyebrow">Operational Dashboard</p><h1>PII Security Dashboard</h1><p>Status: FAIL</p></div>
+  <div class="scorecard"><span class="badge fail">FAIL</span><strong>252741</strong><span>Risk Score</span></div>
+</section>
+<section class="grid">
+  <div class="panel"><h2>Severity</h2><canvas id="severityChart"></canvas></div>
+  <div class="panel"><h2>Categories</h2><canvas id="categoryChart"></canvas></div>
+</section>
+<section class="grid">
+  <div class="panel"><h2>Top Files</h2><canvas id="topFilesChart"></canvas></div>
+  <div class="panel"><h2>Trend</h2><pre>{
+  &quot;trend_available&quot;: true,
+  &quot;previous_total_findings&quot;: 85387,
+  &quot;current_total_findings&quot;: 85387,
+  &quot;findings_delta&quot;: 0,
+  &quot;findings_trend&quot;: &quot;unchanged&quot;,
+  &quot;previous_risk_score&quot;: 252741,
+  &quot;current_risk_score&quot;: 252741,
+  &quot;risk_score_delta&quot;: 0,
+  &quot;risk_score_trend&quot;: &quot;unchanged&quot;,
+  &quot;category_deltas&quot;: {
+    &quot;Secrets&quot;: 0,
+    &quot;Personal Information&quot;: 0,
+    &quot;Financial Data&quot;: 0,
+    &quot;Authentication&quot;: 0,
+    &quot;Medical Data&quot;: 0,
+    &quot;Government IDs&quot;: 0,
+    &quot;Network Information&quot;: 0,
+    &quot;Business Information&quot;: 0,
+    &quot;Credentials&quot;: 0,
+    &quot;Other&quot;: 0
+  },
+  &quot;most_improved_category&quot;: null,
+  &quot;worst_category&quot;: null
+}</pre></div>
+</section>
+<section class="panel"><h2>Developer Guidance</h2><h2>Developer Guidance Report</h2>
+<h3>Executive Summary</h3>
+<p>This developer guidance report accompanies the PII scan of D:\gitlab-pii-scanner\juice-shop. It explains, for each detected issue, why it was flagged and how to fix it -- the risk score and pipeline status themselves are decided exclusively by the deterministic risk engine and are reproduced here for reference only.</p>
+<h3>Risk Score &amp; Overall Severity</h3>
+<ul>
+<li>**Risk score:** 252741 (warning &gt;= 20, fail &gt;= 50)</li>
+<li>**Pipeline status:** FAIL</li>
+<li>**Total findings:** 85387</li>
+<li>**Overall severity breakdown:**</li>
+<li>Critical: 122</li>
+<li>High: 17946</li>
+<li>Medium: 28985</li>
+<li>Low: 38334</li>
+</ul>
+<h3>Detected Issues, Root Cause &amp; Recommended Fix</h3>
+<p>### F-000578 - CREDIT_CARD [CRITICAL]</p>
+<ul>
+<li>**Location:** REFERENCES.md:473</li>
+<li>**Category:** Financial Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A payment card number was committed directly into source, configuration, or test data instead of being handled exclusively by a PCI-compliant payment processor.</li>
+<li>**Likely developer mistake:** Using a real (or realistic) card number for local testing or debugging instead of a card network&#x27;s published test number range.</li>
+<li>**Security impact:** Exposure of payment card data in a repository is a PCI-DSS violation and a direct financial-fraud risk.</li>
+<li>**Recommended fix:** Remove hardcoded payment card data from source. Never store raw card numbers in code, config, or logs; use a PCI-compliant payment processor/tokenization service instead.</li>
+<li>**Security best practice:** Never store raw payment card numbers in code, config, or logs; tokenize via a PCI-compliant payment processor.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-312: Cleartext Storage of Sensitive Information</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/312.html</li>
+</ul>
+<p>### F-000579 - CREDIT_CARD [CRITICAL]</p>
+<ul>
+<li>**Location:** REFERENCES.md:494</li>
+<li>**Category:** Financial Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A payment card number was committed directly into source, configuration, or test data instead of being handled exclusively by a PCI-compliant payment processor.</li>
+<li>**Likely developer mistake:** Using a real (or realistic) card number for local testing or debugging instead of a card network&#x27;s published test number range.</li>
+<li>**Security impact:** Exposure of payment card data in a repository is a PCI-DSS violation and a direct financial-fraud risk.</li>
+<li>**Recommended fix:** Remove hardcoded payment card data from source. Never store raw card numbers in code, config, or logs; use a PCI-compliant payment processor/tokenization service instead.</li>
+<li>**Security best practice:** Never store raw payment card numbers in code, config, or logs; tokenize via a PCI-compliant payment processor.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-312: Cleartext Storage of Sensitive Information</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/312.html</li>
+</ul>
+<p>### F-003178 - MEDICAL_LICENSE [CRITICAL]</p>
+<ul>
+<li>**Location:** .github\workflows\lock.yml:20</li>
+<li>**Category:** Medical Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A medical license number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real practitioner&#x27;s license number in a fixture instead of a synthetic value.</li>
+<li>**Security impact:** Exposure can support impersonation of a licensed medical professional or fraudulent billing.</li>
+<li>**Recommended fix:** Remove hardcoded medical license numbers and replace with synthetic test data.</li>
+<li>**Security best practice:** Never hardcode medical license numbers; use synthetic practitioner data in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-005048 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\challenges.yml:848</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-005532 - CREDIT_CARD [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\users.yml:22</li>
+<li>**Category:** Financial Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A payment card number was committed directly into source, configuration, or test data instead of being handled exclusively by a PCI-compliant payment processor.</li>
+<li>**Likely developer mistake:** Using a real (or realistic) card number for local testing or debugging instead of a card network&#x27;s published test number range.</li>
+<li>**Security impact:** Exposure of payment card data in a repository is a PCI-DSS violation and a direct financial-fraud risk.</li>
+<li>**Recommended fix:** Remove hardcoded payment card data from source. Never store raw card numbers in code, config, or logs; use a PCI-compliant payment processor/tokenization service instead.</li>
+<li>**Security best practice:** Never store raw payment card numbers in code, config, or logs; tokenize via a PCI-compliant payment processor.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-312: Cleartext Storage of Sensitive Information</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/312.html</li>
+</ul>
+<p>### F-005533 - CREDIT_CARD [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\users.yml:26</li>
+<li>**Category:** Financial Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A payment card number was committed directly into source, configuration, or test data instead of being handled exclusively by a PCI-compliant payment processor.</li>
+<li>**Likely developer mistake:** Using a real (or realistic) card number for local testing or debugging instead of a card network&#x27;s published test number range.</li>
+<li>**Security impact:** Exposure of payment card data in a repository is a PCI-DSS violation and a direct financial-fraud risk.</li>
+<li>**Recommended fix:** Remove hardcoded payment card data from source. Never store raw card numbers in code, config, or logs; use a PCI-compliant payment processor/tokenization service instead.</li>
+<li>**Security best practice:** Never store raw payment card numbers in code, config, or logs; tokenize via a PCI-compliant payment processor.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-312: Cleartext Storage of Sensitive Information</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/312.html</li>
+</ul>
+<p>### F-005534 - CREDIT_CARD [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\users.yml:58</li>
+<li>**Category:** Financial Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A payment card number was committed directly into source, configuration, or test data instead of being handled exclusively by a PCI-compliant payment processor.</li>
+<li>**Likely developer mistake:** Using a real (or realistic) card number for local testing or debugging instead of a card network&#x27;s published test number range.</li>
+<li>**Security impact:** Exposure of payment card data in a repository is a PCI-DSS violation and a direct financial-fraud risk.</li>
+<li>**Recommended fix:** Remove hardcoded payment card data from source. Never store raw card numbers in code, config, or logs; use a PCI-compliant payment processor/tokenization service instead.</li>
+<li>**Security best practice:** Never store raw payment card numbers in code, config, or logs; tokenize via a PCI-compliant payment processor.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-312: Cleartext Storage of Sensitive Information</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/312.html</li>
+</ul>
+<p>### F-005535 - CREDIT_CARD [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\users.yml:82</li>
+<li>**Category:** Financial Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A payment card number was committed directly into source, configuration, or test data instead of being handled exclusively by a PCI-compliant payment processor.</li>
+<li>**Likely developer mistake:** Using a real (or realistic) card number for local testing or debugging instead of a card network&#x27;s published test number range.</li>
+<li>**Security impact:** Exposure of payment card data in a repository is a PCI-DSS violation and a direct financial-fraud risk.</li>
+<li>**Recommended fix:** Remove hardcoded payment card data from source. Never store raw card numbers in code, config, or logs; use a PCI-compliant payment processor/tokenization service instead.</li>
+<li>**Security best practice:** Never store raw payment card numbers in code, config, or logs; tokenize via a PCI-compliant payment processor.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-312: Cleartext Storage of Sensitive Information</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/312.html</li>
+</ul>
+<p>### F-005537 - CREDIT_CARD [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\users.yml:102</li>
+<li>**Category:** Financial Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A payment card number was committed directly into source, configuration, or test data instead of being handled exclusively by a PCI-compliant payment processor.</li>
+<li>**Likely developer mistake:** Using a real (or realistic) card number for local testing or debugging instead of a card network&#x27;s published test number range.</li>
+<li>**Security impact:** Exposure of payment card data in a repository is a PCI-DSS violation and a direct financial-fraud risk.</li>
+<li>**Recommended fix:** Remove hardcoded payment card data from source. Never store raw card numbers in code, config, or logs; use a PCI-compliant payment processor/tokenization service instead.</li>
+<li>**Security best practice:** Never store raw payment card numbers in code, config, or logs; tokenize via a PCI-compliant payment processor.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-312: Cleartext Storage of Sensitive Information</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/312.html</li>
+</ul>
+<p>### F-006963 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\codefixes\redirectChallenge_1.ts:3</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-006973 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\codefixes\redirectChallenge_2.ts:3</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-006984 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\codefixes\redirectChallenge_3.ts:3</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-006995 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\codefixes\redirectChallenge_4_correct.ts:3</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-007012 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\codefixes\redirectCryptoCurrencyChallenge_2.ts:3</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-007027 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\codefixes\redirectCryptoCurrencyChallenge_4.ts:3</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-007437 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\i18n\ar_SA.json:169</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-007438 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\i18n\ar_SA.json:169</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-008077 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\i18n\az_AZ.json:169</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-008078 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\i18n\az_AZ.json:169</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>### F-008740 - CRYPTO [CRITICAL]</p>
+<ul>
+<li>**Location:** data\static\i18n\bg_BG.json:169</li>
+<li>**Category:** Secrets</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A cryptocurrency wallet address or private key was committed directly into source instead of being retrieved from secure key storage at runtime.</li>
+<li>**Likely developer mistake:** Pasting a real wallet address or key into code or a config file for convenience during development.</li>
+<li>**Security impact:** Exposed wallet keys can be used to irreversibly move funds; unlike a password, a crypto private key cannot be revoked.</li>
+<li>**Recommended fix:** Remove hardcoded cryptocurrency wallet addresses/keys from source. Store private keys in a secrets manager, never in code.</li>
+<li>**Security best practice:** Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**OWASP:** OWASP A02:2021 - Cryptographic Failures</li>
+<li>**CWE:** CWE-798: Use of Hard-coded Credentials</li>
+<li>**References:** https://owasp.org/Top10/A02_2021-Cryptographic_Failures/, https://cwe.mitre.org/data/definitions/798.html</li>
+</ul>
+<p>...and 85367 more finding(s). See `dashboard.json` for category-level aggregates or the full JSON report for every finding.</p>
+<h3>Secure Coding Recommendations (by category)</h3>
+<ul>
+<li>**CREDIT_CARD** (CRITICAL): OWASP A02:2021 - Cryptographic Failures / CWE-312: Cleartext Storage of Sensitive Information -- Never store raw payment card numbers in code, config, or logs; tokenize via a PCI-compliant payment processor.</li>
+<li>**MEDICAL_LICENSE** (CRITICAL): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode medical license numbers; use synthetic practitioner data in tests.</li>
+<li>**CRYPTO** (CRITICAL): OWASP A02:2021 - Cryptographic Failures / CWE-798: Use of Hard-coded Credentials -- Never store private keys or wallet credentials in source; load them from a hardware wallet, HSM, or secrets manager.</li>
+<li>**UK_NHS** (CRITICAL): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode health-system identifiers; use synthetic patient data in tests.</li>
+<li>**PERSON** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Use synthetic names in code, comments, and test fixtures.</li>
+<li>**LOCATION** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Use synthetic addresses/locations in test data instead of real, individual-linked locations.</li>
+<li>**EMAIL_ADDRESS** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**IP_ADDRESS** (HIGH): OWASP A05:2021 - Security Misconfiguration / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Move environment-specific IP addresses into configuration or secrets management rather than hardcoding in source.</li>
+<li>**US_DRIVER_LICENSE** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode driver&#x27;s license numbers; use synthetic identity documents in tests.</li>
+<li>**PHONE_NUMBER** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Use a reserved test number range (e.g. 555-01xx) instead of real phone numbers.</li>
+<li>**ORGANIZATION** (MEDIUM): OWASP A01:2021 - Broken Access Control / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.</li>
+<li>**URL** (LOW): OWASP A05:2021 - Security Misconfiguration / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Move environment-specific or credentialed URLs into configuration/secrets rather than hardcoding in source.</li>
+<li>**DATE_TIME** (LOW): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Use synthetic dates in test data if a date is tied to a real individual (e.g. a date of birth).</li>
+<li>**NRP** (LOW): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Avoid recording real, individual-linked nationality/religious/political detail in code, fixtures, or logs.</li>
+</ul></section>
+<script>const reportData = {"severity": {"CRITICAL": 122, "HIGH": 17946, "MEDIUM": 28985, "LOW": 38334}, "categories": {"Secrets": 106, "Personal Information": 22669, "Financial Data": 7, "Authentication": 0, "Medical Data": 9, "Government IDs": 15, "Network Information": 33596, "Business Information": 28985, "Credentials": 0, "Other": 0}, "topCategories": {"Network Information": 33596, "Business Information": 28985, "Personal Information": 22669, "Secrets": 106, "Government IDs": 15, "Medical Data": 9, "Financial Data": 7}, "topFiles": {"frontend\\src\\assets\\private\\three.js": 12820, "data\\static\\i18n\\pl_PL.json": 1960, "data\\static\\i18n\\ro_RO.json": 1129, "REFERENCES.md": 1117, "frontend\\src\\assets\\private\\dat.gui.min.js": 1079, "data\\static\\i18n\\de_CH.json": 1018, "data\\static\\i18n\\de_DE.json": 1006, "data\\static\\i18n\\da_DK.json": 904, "data\\static\\i18n\\nl_NL.json": 902, "data\\static\\i18n\\es_ES.json": 894}}; renderCharts(reportData);</script>
+</main>
+  <script>
+function palette(i){return ['#dc2626','#ea580c','#ca8a04','#2563eb','#0891b2','#7c3aed','#16a34a','#64748b'][i%8];}
+function drawBar(canvas, data){const ctx=canvas.getContext('2d'), labels=Object.keys(data), vals=Object.values(data);const w=canvas.width=canvas.clientWidth*2,h=canvas.height=canvas.clientHeight*2,max=Math.max(...vals,1);ctx.scale(2,2);ctx.clearRect(0,0,w,h);labels.forEach((label,i)=>{const y=28+i*32,bw=(canvas.clientWidth-170)*(vals[i]/max);ctx.fillStyle=palette(i);ctx.fillRect(140,y,bw,18);ctx.fillStyle='#172033';ctx.font='12px Segoe UI';ctx.fillText(label,8,y+14);ctx.fillText(vals[i],145+bw,y+14);});}
+function drawDonut(canvas, data){const ctx=canvas.getContext('2d'), entries=Object.entries(data).filter(([,v])=>v>0);const w=canvas.width=canvas.clientWidth*2,h=canvas.height=canvas.clientHeight*2,cx=w/4,cy=h/4,r=Math.min(cx,cy)-20,total=entries.reduce((s,e)=>s+e[1],0)||1;ctx.scale(2,2);let a=-Math.PI/2;entries.forEach(([label,v],i)=>{const next=a+Math.PI*2*(v/total);ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,next);ctx.closePath();ctx.fillStyle=palette(i);ctx.fill();a=next;ctx.fillStyle='#172033';ctx.font='12px Segoe UI';ctx.fillText(label+' '+v,cx+r+24,34+i*20);});ctx.beginPath();ctx.arc(cx,cy,r*.55,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();}
+function renderCharts(d){const sev=document.getElementById('severityChart'), cat=document.getElementById('categoryChart'), topCat=document.getElementById('topCategoryChart'), topFiles=document.getElementById('topFilesChart');if(sev)drawDonut(sev,d.severity||{});if(cat)drawDonut(cat,d.categories||{});if(topCat)drawBar(topCat,d.topCategories||{});if(topFiles)drawBar(topFiles,d.topFiles||{});}
+</script>
+</body>
+</html>

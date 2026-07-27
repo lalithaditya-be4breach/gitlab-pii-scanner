@@ -20,6 +20,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from datetime import UTC, datetime
 
 
 class Severity(str, Enum):
@@ -63,7 +64,9 @@ class RepositorySource:
     source_type: RepositorySourceType
     identifier: str  # e.g. a GitLab URL, or an absolute local path
     local_path: Path
-    resolved_at: datetime = field(default_factory=datetime.utcnow)
+    resolved_at: datetime = field(
+        default_factory=lambda: datetime.now(UTC)
+    )
 
 
 @dataclass(frozen=True, slots=True)

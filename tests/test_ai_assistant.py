@@ -16,6 +16,7 @@ requirement.
 from __future__ import annotations
 
 from dataclasses import replace
+from os import path
 from pathlib import Path
 from unittest.mock import patch
 
@@ -116,7 +117,10 @@ def test_generate_writes_markdown_file_to_output_directory(tmp_path: Path) -> No
 
     markdown, path = assistant.generate(_sample_report())
 
-    assert path == settings.output_directory / "ai-summary.md"
+    assert path.name == "AI_Summary.md"
+    assert path.parent.name == "latest"
+    assert path.parent.parent.name == "reports"
+    assert path.is_file()
     assert path.exists()
     assert path.read_text(encoding="utf-8") == markdown
 

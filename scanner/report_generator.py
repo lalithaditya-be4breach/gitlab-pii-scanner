@@ -168,7 +168,7 @@ class ReportGenerator:
 
     def write_json_report(self, report: dict[str, Any]) -> Path:
         """
-        Write `report` to a timestamped JSON file, plus a `latest.json` copy.
+        Write `report` to the canonical latest scan report path.
 
         Args:
             report: A report dict, as produced by `build_report()`.
@@ -176,17 +176,15 @@ class ReportGenerator:
         Returns:
             Path to the timestamped report file that was written.
         """
-        reports_dir = ensure_directory(self._settings.report_output_directory)
-
-        timestamp = format_timestamp_for_filename(utc_now())
-        report_path = reports_dir / f"report_{timestamp}.json"
-        latest_path = reports_dir / "latest.json"
+        reports_dir = ensure_directory(
+            self._settings.working_directory / "reports" / "latest"
+        )
+        report_path = reports_dir / "scan_report.json"
 
         payload = json.dumps(report, indent=2, sort_keys=False)
         report_path.write_text(payload, encoding="utf-8")
-        latest_path.write_text(payload, encoding="utf-8")
 
-        logger.info("Report written to %s (and latest.json)", report_path)
+        logger.info("Scan report written to %s", report_path)
         return report_path
 
     def generate(

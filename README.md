@@ -11,14 +11,19 @@ as the detection engine.
 > | **Task 1** — PII identification (Microsoft Presidio) | **Completed** |
 > | **Task 2, Phase 1** — Deterministic risk engine + JSON reporting | **Completed** |
 > | **Task 2, Phase 2** — AI Assistant (summaries from JSON only) | **Completed** |
-> | **Task 2, Phase 3** — Azure DevOps pipeline integration | Not started |
+> | **Task 2, Phase 3** — Azure DevOps pipeline integration | **Completed** |
+> | **Task 2, Phase 4** — AI-Assisted DevSecOps Intelligence Layer | **Completed** |
 >
 > Task 1 delivers `RepositoryManager`, `FileScanner`, `PIIDetector`, and
 > `ScanEngine`. Task 2, Phase 1 adds `RiskEngine` and `ReportGenerator`
 > (versioned, redacted JSON). Task 2, Phase 2 adds `AIAssistant`, which
 > consumes that JSON and writes a Markdown summary without changing
-> findings, risk scores, or pipeline status. Azure DevOps integration
-> follows in Phase 3.
+> findings, risk scores, or pipeline status. Task 2, Phase 3 adds the
+> Azure DevOps pipeline (`azure-pipelines.yml` + `ci/evaluate_gate.py`).
+> Task 2, Phase 4 adds `scanner/intelligence/` — root cause analysis,
+> deterministic remediation, trend tracking, a developer guidance
+> report, an executive dashboard JSON, and an optional `/api/explain`
+> endpoint — all read-only over the same JSON report.
 
 ---
 
@@ -46,7 +51,21 @@ gitlab-pii-scanner/
 │   ├── test_ai_providers.py             # Task 2, Phase 2
 │   ├── test_ai_prompt_builder.py        # Task 2, Phase 2
 │   ├── test_ai_markdown_generator.py    # Task 2, Phase 2
-│   └── test_ai_recommendations.py       # Task 2, Phase 2
+│   ├── test_ai_recommendations.py       # Task 2, Phase 2
+│   ├── test_evaluate_gate.py            # Task 2, Phase 3
+│   ├── test_intelligence_categories.py     # Task 2, Phase 4
+│   ├── test_intelligence_finding_ids.py    # Task 2, Phase 4
+│   ├── test_intelligence_root_cause.py     # Task 2, Phase 4
+│   ├── test_intelligence_remediation.py    # Task 2, Phase 4
+│   ├── test_intelligence_trend.py          # Task 2, Phase 4
+│   ├── test_intelligence_guidance.py       # Task 2, Phase 4
+│   ├── test_intelligence_dashboard.py      # Task 2, Phase 4
+│   ├── test_intelligence_api.py            # Task 2, Phase 4
+│   └── test_intelligence_orchestrator.py   # Task 2, Phase 4
+├── ci/                         # Task 2, Phase 3 — Azure DevOps pipeline gate
+│   ├── __init__.py
+│   └── evaluate_gate.py
+├── azure-pipelines.yml
 └── scanner/                   # Application package
     ├── __init__.py
     ├── config.py
@@ -59,13 +78,24 @@ gitlab-pii-scanner/
     ├── scan_engine.py
     ├── risk_engine.py
     ├── report_generator.py
-    └── ai/                      # Task 2, Phase 2 — AI Assistant layer
+    ├── ai/                      # Task 2, Phase 2 — AI Assistant layer
+    │   ├── __init__.py
+    │   ├── ai_assistant.py
+    │   ├── providers.py
+    │   ├── prompt_builder.py
+    │   ├── markdown_generator.py
+    │   └── recommendations.py
+    └── intelligence/            # Task 2, Phase 4 — Intelligence layer
         ├── __init__.py
-        ├── ai_assistant.py
-        ├── providers.py
-        ├── prompt_builder.py
-        ├── markdown_generator.py
-        └── recommendations.py
+        ├── finding_ids.py
+        ├── categories.py
+        ├── root_cause.py
+        ├── remediation.py
+        ├── trend.py
+        ├── guidance.py
+        ├── dashboard.py
+        ├── api.py
+        └── orchestrator.py
 ```
 
 The `presidio/` folder at the repository root is the official upstream
@@ -112,7 +142,7 @@ if `python-dotenv` is installed):
 | `SCANNER_ENVIRONMENT`         | `local`               | Environment label (`local`, `ci`, `production`)|
 | `SCANNER_LOG_LEVEL`           | `INFO`                | `DEBUG`/`INFO`/`WARNING`/`ERROR`/`CRITICAL`     |
 | `SCANNER_WORKING_DIR`         | current directory     | Base working directory                         |
-| `SCANNER_OUTPUT_DIR`          | `<working_dir>/output`| Where logs/reports are written                 |
+| `SCANNER_OUTPUT_DIR`          | `<working_dir>/output`| Where non-report runtime output such as logs and clone workspaces is written |
 | `SCANNER_MAX_FILE_SIZE_BYTES` | `5242880` (5 MB)      | Skip files larger than this during scanning    |
 | `PRESIDIO_LANGUAGE`           | `en`                  | Language passed to Presidio's analyzer         |
 | `PRESIDIO_MIN_CONFIDENCE`     | `0.5`                 | Minimum confidence score to keep a finding      |
@@ -121,7 +151,7 @@ if `python-dotenv` is installed):
 | `SCANNER_CLONE_SHALLOW_DEPTH` | `1`                   | Git clone depth (`0` = full clone, no `--depth`)|
 | `RISK_WARNING_THRESHOLD`      | `20`                  | Weighted risk score at/above which status is `WARNING` |
 | `RISK_FAIL_THRESHOLD`         | `50`                  | Weighted risk score at/above which status is `FAIL` (any CRITICAL finding also forces `FAIL`) |
-| `REPORT_OUTPUT_DIR`           | `<output_dir>/reports` | Where JSON reports (`report_<timestamp>.json`, `latest.json`) are written |
+| `REPORT_OUTPUT_DIR`           | `<working_dir>/reports/latest` | Legacy-compatible setting; reports are written to `reports/latest` and archived under `reports/history` |
 | `REPORT_REDACTION_ENABLED`    | `true`                | Mask matched PII values in the JSON report (recommended: always `true` if the report may be published, e.g. as a pipeline artifact) |
 | `AI_ENABLED`                  | `true`                | Enable the AI Assistant layer (Task 2, Phase 2). When `false`, or when AI fails for any reason, a deterministic fallback summary is written instead |
 | `AI_PROVIDER`                 | `null`                | `null` (deterministic fallback, no network calls), `openai`, or `azure_openai` |
@@ -131,7 +161,7 @@ if `python-dotenv` is installed):
 | `AI_TIMEOUT_SECONDS`          | `30`                  | Per-request timeout for the AI provider |
 | `AI_AZURE_ENDPOINT`           | *(empty)*             | Azure OpenAI resource endpoint (required when `AI_PROVIDER=azure_openai`) |
 | `AI_AZURE_API_VERSION`        | `2024-08-01-preview`  | Azure OpenAI API version |
-| `AI_SUMMARY_FILENAME`         | `ai-summary.md`       | Filename for the AI-generated Markdown summary, written under `output_directory` |
+| `AI_SUMMARY_FILENAME`         | `AI_Summary.md`       | Legacy-compatible setting; the AI summary is written as `reports/latest/AI_Summary.md` |
 
 ## Running
 
@@ -142,15 +172,20 @@ scans it with `ScanEngine` (`FileScanner` + `PIIDetector`), then:
    into a `risk_score` and a `PASS`/`WARNING`/`FAIL` `pipeline_status`
    (any single `CRITICAL` finding forces `FAIL`, regardless of score).
 2. `ReportGenerator` writes a versioned JSON report to
-   `report_output_directory` (`report_<timestamp>.json` plus a
-   `latest.json`), with every matched PII value **redacted by
+   `reports/latest/scan_report.json`, with every matched PII value **redacted by
    default** (e.g. `jo***@example.com`, `************1111`) so the
    report is safe to store or publish as a pipeline artifact.
 3. `AIAssistant` (Task 2, Phase 2) consumes that JSON report and
    writes a developer/management-friendly Markdown summary to
-   `<output_dir>/ai-summary.md` (see **AI Assistant (Task 2, Phase
+   `reports/latest/AI_Summary.md` (see **AI Assistant (Task 2, Phase
    2)** below). This never overwrites the JSON report, and an AI
    failure of any kind never aborts the scan.
+4. `IntelligenceEngine` (Task 2, Phase 4) consumes the same JSON
+   report and writes `developer-guidance.md`, `dashboard.json`, and a
+   trend snapshot under `<output_dir>/intelligence/` (see **Phase 4 —
+   AI-Assisted DevSecOps Intelligence Layer** below). Like the AI
+   Assistant, this never changes a finding, risk score, or pipeline
+   status, and a failure here never aborts the scan either.
 
 The console/log summary (counts by severity, then each finding) is
 still printed as before, followed by the pipeline status and the
@@ -254,7 +289,10 @@ pytest tests/ -v
 Local-repository tests run fully offline. GitLab-clone tests use a
 small public repository to exercise the real `git.Repo.clone_from()`
 code path, and are automatically skipped if no outbound network
-access is available.
+access is available. The `scanner/intelligence/` tests
+(`tests/test_intelligence_*.py`) are all offline and dependency-free —
+they only exercise report-derived logic and a stdlib-only HTTP
+handler, never Presidio, Git, or a real AI provider.
 
 ## Roadmap
 
@@ -267,6 +305,7 @@ access is available.
 - [x] **Phase 1** — Reporting foundation + deterministic risk engine (this phase)
 - [x] **Phase 2** — AI assistant (explanations/remediation only; never detects PII or decides pipeline status)
 - [x] **Phase 3** — Azure DevOps pipeline integration (YAML, artifacts, build gating)
+- [x] **Phase 4** — AI-Assisted DevSecOps Intelligence Layer (root cause, remediation, trend, developer guidance, dashboard, `/api/explain`)
 
 ## Phase 3 – Azure DevOps Integration
 
@@ -324,7 +363,7 @@ A small, dependency-free (standard-library only) helper script — the
 *only* new code that runs after the scanner in Phase 3:
 
 - Reads `summary.pipeline_status` from the JSON report
-  (`output/reports/latest.json` by default; override with
+  (`reports/latest/scan_report.json` by default; override with
   `--report-path`).
 - **Never** recomputes risk, never inspects `findings`, never
   duplicates any `RiskEngine` logic — it only reads a field that
@@ -352,8 +391,8 @@ A small, dependency-free (standard-library only) helper script — the
 
 | Artifact name         | Source file                        |
 |------------------------|-------------------------------------|
-| `pii-scan-report`      | `output/reports/latest.json`        |
-| `pii-scan-ai-summary`  | `output/ai-summary.md`              |
+| `pii-scan-report`      | `reports/latest/scan_report.json`        |
+| `pii-scan-ai-summary`  | `reports/latest/AI_Summary.md`              |
 
 No additional report formats are introduced in this phase.
 
@@ -404,6 +443,107 @@ on a successful scan (unchanged from Phase 1/2, preserving existing
 CLI behavior and tests). Build gating in Azure DevOps comes entirely
 from `ci/evaluate_gate.py`'s exit code, not from `main.py`'s.
 
+## Phase 4 — AI-Assisted DevSecOps Intelligence Layer
+
+Phase 4 is **not another scanner**. It is a read-only intelligence
+layer that sits after the AI Assistant:
+
+```
+RepositoryManager -> ScanEngine -> RiskEngine -> ReportGenerator -> AIAssistant -> IntelligenceEngine
+```
+
+Where Phase 2 tells a reader *what* was found and *how severe* it is,
+Phase 4 answers the questions a developer actually asks next: **why**
+was this flagged, **where** exactly does it live, **how** do I fix it,
+and **how** do I stop it recurring. It is implemented in
+`scanner/intelligence/`:
+
+| Module              | Responsibility                                                                 |
+|---------------------|----------------------------------------------------------------------------------|
+| `finding_ids.py`     | Deterministic, positional IDs for findings (e.g. `F-000007`) — added without changing the JSON report schema |
+| `categories.py`      | Groups Presidio entity types into risk categories (Secrets, Personal Information, Financial Data, Government IDs, Medical Data, Network Information, Authentication, Credentials, Other) |
+| `root_cause.py`      | `RootCauseEngine` — per finding: root cause, why it was detected, confidence (Presidio's own `confidence_score`, never fabricated), likely developer mistake, security impact |
+| `remediation.py`     | `RemediationEngine` — reuses `scanner.ai.recommendations` for the fix text (never duplicates it) and adds an OWASP Top 10 reference, a CWE mapping, and a secure-coding best practice per entity type |
+| `trend.py`           | `TrendAnalyzer` — compares the current report to the previous scan (read from `reports/history/`); reports gracefully when no previous scan exists yet |
+| `guidance.py`        | `DeveloperGuidanceReportBuilder` — renders `Developer_Guidance.md`, distinct from Phase 2's `AI_Summary.md` |
+| `dashboard.py`       | `DashboardBuilder` — renders `dashboard.json`, a backend-only aggregate for a future frontend |
+| `api.py`             | `ExplainService` + an optional, dependency-free `/api/explain` HTTP endpoint |
+| `orchestrator.py`    | `IntelligenceEngine`, the single integration point `main.py` calls           |
+
+**Architecture rule, unchanged from Phases 1–3:** this layer only
+*explains* an already-produced report. Nothing in
+`scanner/intelligence/` re-runs Presidio, recomputes `risk_score`, or
+changes `summary.pipeline_status` — and, like the AI Assistant, a
+failure anywhere in this layer is logged and never aborts the scan
+(`main.py` wraps the call exactly the way it wraps `AIAssistant`).
+
+### Artifacts written
+
+All report output now lives under `reports/`, so report artifacts no
+longer collide with duplicate `output/` locations:
+
+| File                                             | Produced by          | Contents |
+|---------------------------------------------------|-----------------------|----------|
+| `reports/latest/Developer_Guidance.md`  | `guidance.py`         | Executive summary, risk score, overall severity, and — per detected issue — root cause, recommended fix, security best practice, and OWASP/CWE references |
+| `reports/latest/dashboard.json`         | `dashboard.py`        | Summary, risk score, category counts, trend, top files, top findings, severity distribution (backend data only — no frontend is included) |
+| `reports/history/Report_XXX_timestamp/scan_report.json` | `trend.py`         | Historical scan report used by the next scan to compute trend |
+
+### AI Risk Trend Summary
+
+`TrendAnalyzer` compares `summary.total_findings` and
+`summary.risk_score` between the current and previous report, and
+compares `categories.build_category_counts()` for both to identify:
+
+- `findings_delta` / `findings_trend` (`increased`/`decreased`/`unchanged`)
+- `risk_score_delta` / `risk_score_trend`
+- `most_improved_category` — the category whose count dropped the most (or `None` if nothing improved)
+- `worst_category` — the category whose count grew the most (or `None` if nothing worsened)
+
+On the very first scan (or if the snapshot file is missing/corrupt),
+`trend_available` is `False` with a human-readable `message` — this
+is expected, not an error.
+
+### `/api/explain`
+
+An optional, standalone HTTP endpoint that answers a question about
+**one already-detected finding**, using only the loaded JSON report —
+it never re-runs the scanner:
+
+```bash
+python -m scanner.intelligence.api --report-path reports/latest/scan_report.json --port 8090
+
+curl "http://127.0.0.1:8090/api/explain?finding_id=F-000000"
+```
+
+Response:
+
+```json
+{
+  "finding_id": "F-000000",
+  "entity_type": "EMAIL_ADDRESS",
+  "severity": "HIGH",
+  "file": "app.py",
+  "line_number": 10,
+  "root_cause": "...",
+  "explanation": "...",
+  "recommendation": "...",
+  "best_practice": "...",
+  "owasp": "...",
+  "cwe": "...",
+  "confidence": 1.0
+}
+```
+
+Deliberately implemented with only the Python standard library
+(`http.server`) rather than a web framework, per the "no additional
+cloud dependencies" / "offline compatible" project requirements. It is
+not started automatically by `main.py` or by `azure-pipelines.yml` —
+it is a tool an engineer runs locally or in CI to query an
+already-written report interactively. Finding IDs (`F-000000`, ...)
+are positions within one report's `findings` list (see
+`finding_ids.py`); they are not persisted into the JSON report schema
+and are not meaningful across two different report files.
+
 ## Design principles
 
 - **Single source of truth for configuration** — `scanner/config.py`
@@ -428,3 +568,9 @@ from `ci/evaluate_gate.py`'s exit code, not from `main.py`'s.
   redacts every matched value before writing to disk
   (`report_redaction_enabled=True`), since a JSON report may be stored
   or published as a pipeline artifact that other people can access.
+- **Explanation layers never re-decide** — both `scanner.ai` (Phase 2)
+  and `scanner.intelligence` (Phase 4) consume only the already-written
+  JSON report; neither can change a finding, a severity, `risk_score`,
+  or `pipeline_status`, and a failure in either layer is logged and
+  never aborts the scan.
+

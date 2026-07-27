@@ -34,7 +34,7 @@ Python standard library -- so it can run on any Azure DevOps
 
 Usage
 -----
-    python ci/evaluate_gate.py --report-path output/reports/latest.json
+    python ci/evaluate_gate.py --report-path reports/latest/scan_report.json
 
 Exit codes
 ----------
@@ -57,7 +57,7 @@ from pathlib import Path
 #: not as a re-implementation of any risk decision.
 _KNOWN_STATUSES = {"PASS", "WARNING", "FAIL"}
 
-_DEFAULT_REPORT_PATH = Path("output") / "reports" / "latest.json"
+_DEFAULT_REPORT_PATH = Path("reports") / "latest" / "scan_report.json"
 
 
 class GateError(Exception):
@@ -70,7 +70,7 @@ def read_pipeline_status(report_path: Path) -> str:
 
     Args:
         report_path: Path to the JSON report written by
-            `ReportGenerator` (typically `output/reports/latest.json`).
+            `ReportGenerator` (typically `reports/latest/scan_report.json`).
 
     Returns:
         The raw `pipeline_status` string ("PASS", "WARNING", or "FAIL").

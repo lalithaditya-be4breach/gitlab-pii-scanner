@@ -78,6 +78,14 @@ def test_build_recommendations_known_entity_gives_specific_advice() -> None:
     assert "payment" in recommendations[0]["recommendation"].lower()
 
 
+def test_recommendation_for_organization_is_specific_not_generic() -> None:
+    recommendation = recommendation_for_entity("ORGANIZATION")
+
+    assert "organization" in recommendation.lower()
+    assert "customer" in recommendation.lower()
+    assert "Review detected ORGANIZATION values" not in recommendation
+
+
 def test_build_recommendations_unknown_entity_gets_generic_fallback_advice() -> None:
     findings = [_finding("SOME_FUTURE_ENTITY", "MEDIUM")]
 

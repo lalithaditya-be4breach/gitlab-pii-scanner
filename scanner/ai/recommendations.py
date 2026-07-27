@@ -93,6 +93,12 @@ _ENTITY_RECOMMENDATIONS: dict[str, str] = {
         "Replace real customer/employee names in code, comments, and test "
         "fixtures with synthetic test data."
     ),
+    "ORGANIZATION": (
+        "Review detected organization names to confirm they are intended "
+        "to be public. Replace confidential customer, partner, vendor, "
+        "supplier, or internal project names with synthetic values in "
+        "source, documentation, logs, and test datasets."
+    ),
     "LOCATION": (
         "Replace real addresses/locations tied to individuals with "
         "synthetic test data."

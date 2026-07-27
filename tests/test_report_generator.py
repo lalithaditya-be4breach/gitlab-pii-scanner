@@ -224,10 +224,14 @@ def test_write_json_report_creates_timestamped_and_latest_files(tmp_path: Path) 
     report_path = generator.write_json_report(report)
 
     assert report_path.exists()
-    assert report_path.parent == settings.report_output_directory
-    latest_path = settings.report_output_directory / "latest.json"
-    assert latest_path.exists()
-    assert json.loads(latest_path.read_text()) == report
+    assert report_path.name == "scan_report.json"
+    assert report_path.parent.name == "latest"
+    assert report_path.parent.parent.name == "reports"
+    assert report_path.is_file()
+
+    # Verify the report contents
+    assert json.loads(report_path.read_text(encoding="utf-8")) == report
+    
 
 
 def test_generate_builds_and_writes_in_one_step(tmp_path: Path) -> None:
@@ -253,4 +257,8 @@ def test_write_json_report_creates_output_directory_if_missing(tmp_path: Path) -
 
     generator.generate(summary, assessment)
 
-    assert settings.report_output_directory.exists()
+    reports_dir = settings.working_directory / "reports"
+    latest_dir = reports_dir / "latest"
+
+    assert reports_dir.exists()
+    assert latest_dir.exists()

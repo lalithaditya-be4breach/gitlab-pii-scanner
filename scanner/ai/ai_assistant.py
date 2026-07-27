@@ -174,7 +174,7 @@ class AIAssistant:
 
     def write_markdown_report(self, markdown: str) -> Path:
         """
-        Write `markdown` to the configured output directory.
+        Write `markdown` to the canonical latest report directory.
 
         Args:
             markdown: The Markdown document, as returned by
@@ -184,8 +184,11 @@ class AIAssistant:
             The path the summary was written to (does not overwrite
             the JSON report produced by `ReportGenerator`).
         """
-        output_directory = ensure_directory(self._settings.output_directory)
-        safe_name = self._validate_summary_filename(self._settings.ai_summary_filename)
+        output_directory = ensure_directory(
+            self._settings.working_directory / "reports" / "latest"
+        )
+        self._validate_summary_filename(self._settings.ai_summary_filename)
+        safe_name = "AI_Summary.md"
         summary_path = (output_directory / safe_name).resolve()
         if not summary_path.is_relative_to(output_directory.resolve()):
             raise ValueError(
