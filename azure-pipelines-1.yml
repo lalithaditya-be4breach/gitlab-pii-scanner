@@ -4,8 +4,8 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- checkout: none
+- checkout: self
 
 - script: |
-    echo "Hello Azure DevOps!"
-  displayName: "Diagnostic Test"
+    echo "Repository checkout succeeded."
+  displayName: "Checkout Test"
