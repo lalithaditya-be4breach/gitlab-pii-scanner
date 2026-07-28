@@ -45,6 +45,29 @@ has nothing to do with auth).
 situation. `remove_clone()` uses it to clear the read-only attribute
 on the one file that failed and retry only that specific operation,
 synchronously and once — not a blind retry loop, and no sleeping.
+
+Python 3.11 vs. 3.12+ compatibility
+------------------------------------
+`shutil.rmtree()`'s error-handling hook changed its keyword and its
+callback signature in Python 3.12:
+
+  - Python 3.12+: `onexc=callback`, and `callback(func, path, exc)` is
+    called with the exception *instance*.
+  - Python <3.12 (including 3.11): `onerror=callback` (the modern
+    `onexc` keyword doesn't exist yet), and
+    `callback(func, path, exc_info)` is called with a
+    `sys.exc_info()`-style `(type, value, traceback)` *tuple*, not an
+    exception instance.
+
+This project's minimum supported version includes 3.11, so both
+keywords must be supported. Rather than branching the retry logic
+itself, `_clear_readonly_and_retry()` stays the single source of
+truth for "clear read-only and retry, or re-raise anything else,"
+and takes the exception instance directly. `_onerror_shim()` adapts
+the legacy `(type, value, traceback)` tuple down to that same
+instance so both code paths share identical behaviour. Which keyword
+`remove_clone()` passes to `shutil.rmtree()` is chosen once, at call
+time, based on the running interpreter's version.
 """
 
 from __future__ import annotations
@@ -52,16 +75,28 @@ from __future__ import annotations
 import os
 import shutil
 import stat
+import sys
 from pathlib import Path
 
 from scanner.logger import get_logger
 
 logger = get_logger(__name__)
 
+# `shutil.rmtree(onexc=...)` was added in Python 3.12; before that,
+# only the legacy `onerror=...` keyword (with a different callback
+# signature) is available.
+_HAS_ONEXC = sys.version_info[:2] >= (3, 12)
+
 
 def _clear_readonly_and_retry(func, path, exc: BaseException) -> None:
     """
-    `shutil.rmtree(onexc=...)` handler: clear a read-only attribute and retry.
+    Shared retry handler: clear a read-only attribute and retry.
+
+    This is the single source of truth for the "clear read-only and
+    retry, or re-raise anything else" behaviour, called from both the
+    Python 3.12+ `onexc` path and the Python <3.12 `onerror` path
+    (via `_onerror_shim`, which adapts the legacy callback signature
+    down to this one).
 
     `shutil.rmtree()` calls this with the specific failing operation
     (`func`, one of `os.unlink`, `os.rmdir`, or `os.listdir`), the
@@ -89,6 +124,25 @@ def _clear_readonly_and_retry(func, path, exc: BaseException) -> None:
 
     os.chmod(path, stat.S_IWRITE)
     func(path)
+
+
+def _onerror_shim(func, path, exc_info) -> None:
+    """
+    `shutil.rmtree(onerror=...)` handler for Python <3.12.
+
+    The legacy `onerror` callback receives a `sys.exc_info()`-style
+    `(type, value, traceback)` tuple instead of the exception
+    instance that `onexc` (3.12+) receives. This adapts that tuple
+    down to the instance and delegates to `_clear_readonly_and_retry`
+    so both code paths share identical retry behaviour.
+
+    Args:
+        func: The function that raised (e.g. `os.unlink`).
+        path: The specific path that failed to be removed.
+        exc_info: The `(type, value, traceback)` tuple `shutil.rmtree()`
+            passes on Python <3.12.
+    """
+    _clear_readonly_and_retry(func, path, exc_info[1])
 
 
 def remove_clone(path: Path, *, clone_base_directory: Path) -> None:
@@ -131,12 +185,16 @@ def remove_clone(path: Path, *, clone_base_directory: Path) -> None:
         return
 
     try:
-        # This project targets Python 3.12+ (see README.md), so the
-        # modern, non-deprecated `onexc` hook is used here rather than
-        # the legacy `onerror` (which passes a `sys.exc_info()` tuple
-        # instead of the exception instance, and is deprecated as of
-        # 3.12).
-        shutil.rmtree(resolved_path, onexc=_clear_readonly_and_retry)
+        # Python 3.12+ provides the modern, non-deprecated `onexc`
+        # hook (exception instance). Python 3.11 only has the legacy
+        # `onerror` hook (a `sys.exc_info()` tuple), so we fall back
+        # to it there via `_onerror_shim`, which adapts the tuple down
+        # to the same exception instance `_clear_readonly_and_retry`
+        # expects — identical behaviour on both versions.
+        if _HAS_ONEXC:
+            shutil.rmtree(resolved_path, onexc=_clear_readonly_and_retry)
+        else:
+            shutil.rmtree(resolved_path, onerror=_onerror_shim)
         logger.info("Deleted temporary clone: %s", resolved_path)
     except OSError as exc:
         logger.warning("Failed to delete temporary clone %s: %s", resolved_path, exc)
