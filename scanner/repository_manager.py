@@ -16,13 +16,23 @@ Design:
       Validates that `path` exists, is a directory, and is a genuine
       (non-bare) Git repository.
 
-    - `RepositoryManager.obtain_gitlab(url, branch=None)`
-      Validates the URL, clones the repository (via GitPython — no
-      shelling out to the `git` CLI) into a unique directory under
-      `settings.clone_base_directory`, optionally checking out a
-      specific branch, and returns the cloned path.
+    - `RepositoryManager.obtain_gitlab(url, branch=None, token=None)`
+      Validates the URL, clones the repository into a unique directory
+      under `settings.clone_base_directory` (optionally checking out a
+      specific branch and authenticating with a Personal Access Token
+      for private repositories), and returns the cloned path. The
+      actual clone mechanics live in `scanner.gitlab` (URL/token
+      handling in `auth.py`, the GitPython call in `clone.py`), which
+      this class delegates to via `GitLabRepositoryProvider` — kept as
+      a small, swappable interface so a future GitHub/Azure
+      Repos/Bitbucket source doesn't require rewriting this class.
 
-    - `RepositoryManager.obtain(local_path=None, gitlab_url=None, branch=None)`
+    - `RepositoryManager.cleanup(repository)`
+      Deletes a GitLab clone once scanning is finished (a no-op for
+      local repositories). The scanner never permanently stores a
+      cloned repository.
+
+    - `RepositoryManager.obtain(local_path=None, gitlab_url=None, branch=None, token=None)`
       Convenience dispatcher: exactly one of `local_path` / `gitlab_url`
       must be provided.
 
@@ -42,6 +52,7 @@ import git
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
 from scanner.config import ScannerSettings, get_settings
+from scanner.gitlab import GitLabRepositoryProvider, remove_clone, sanitize_error_text
 from scanner.logger import get_logger
 from scanner.models import RepositorySource, RepositorySourceType
 from scanner.utils import ensure_directory
@@ -109,6 +120,12 @@ class RepositoryManager:
                 process-wide singleton from `scanner.config.get_settings()`.
         """
         self._settings = settings or get_settings()
+        # GitLab-specific clone mechanics (URL authentication, the
+        # actual `git clone` call) live behind this provider so this
+        # class stays the single, source-agnostic entry point --
+        # future remote sources (GitHub, Azure Repos, Bitbucket) would
+        # plug in the same way. See `scanner/gitlab/provider.py`.
+        self._gitlab_provider = GitLabRepositoryProvider()
 
     # -- Local repositories --------------------------------------------------
 
@@ -145,7 +162,21 @@ class RepositoryManager:
                 f"Not a valid Git repository: {resolved_path}"
             ) from exc
 
-        if repo.bare:
+        try:
+            is_bare = repo.bare
+        finally:
+            # This `Repo` only exists to answer "is this a valid,
+            # non-bare repository?" — nothing downstream needs it kept
+            # open (the scanner walks the working tree with plain
+            # filesystem calls, not GitPython). Closing it here
+            # releases the same class of mmap'd pack-file handles
+            # `clone.py` releases after cloning, so a local-repository
+            # scan can't leak a handle either. See `clone.py`'s module
+            # docstring for the full explanation of why this matters
+            # on Windows.
+            repo.close()
+
+        if is_bare:
             raise InvalidRepository(
                 f"Repository is bare (no working tree to scan): {resolved_path}"
             )
@@ -159,16 +190,27 @@ class RepositoryManager:
 
     # -- GitLab repositories --------------------------------------------------
 
-    def obtain_gitlab(self, url: str, branch: str | None = None) -> RepositorySource:
+    def obtain_gitlab(
+        self, url: str, branch: str | None = None, token: str | None = None
+    ) -> RepositorySource:
         """
         Clone a GitLab (or any Git-compatible) repository and return its path.
 
         Args:
             url: HTTPS or SSH clone URL, e.g.
                 "https://gitlab.com/group/project.git" or
-                "git@gitlab.com:group/project.git".
+                "git@gitlab.com:group/project.git". Never include a
+                credential in this URL yourself — pass it via `token`
+                instead, so it can be kept out of logs and reports.
             branch: Optional branch to check out. Defaults to the
                 repository's default branch when omitted.
+            token: Optional GitLab Personal Access Token, required for
+                private repositories. Used only to build the
+                credentialed URL passed to Git for this single clone
+                call; it is never stored on the returned
+                `RepositorySource`, logged, or written to any report
+                (`RepositorySource.identifier` always stays the
+                token-free `url` given above).
 
         Returns:
             A `RepositorySource` pointing at the cloned repository.
@@ -186,32 +228,29 @@ class RepositoryManager:
 
         destination = self._new_clone_destination(url)
         logger.info(
-            "Cloning repository %s%s into %s",
+            "Cloning repository %s%s into %s%s",
             url,
             f" (branch={branch})" if branch else "",
             destination,
+            " using a supplied access token" if token else "",
         )
 
-        clone_kwargs: dict[str, object] = {
-            # Never let Git prompt interactively for credentials; a
-            # missing/invalid credential should fail fast instead of
-            # hanging the process waiting for terminal input.
-            "env": {"GIT_TERMINAL_PROMPT": "0"},
-        }
-        if branch:
-            clone_kwargs["branch"] = branch
-        if self._settings.clone_shallow_depth > 0:
-            clone_kwargs["depth"] = self._settings.clone_shallow_depth
-
         try:
-            git.Repo.clone_from(url, destination, **clone_kwargs)
+            self._gitlab_provider.clone(
+                url,
+                destination,
+                branch=branch,
+                token=token,
+                shallow_depth=self._settings.clone_shallow_depth,
+            )
         except GitCommandError as exc:
             self._cleanup_failed_clone(destination)
-            raise self._translate_clone_error(exc, url=url, branch=branch) from exc
+            raise self._translate_clone_error(exc, url=url, branch=branch, token=token) from exc
         except Exception as exc:  # noqa: BLE001 - translate any unexpected failure
             self._cleanup_failed_clone(destination)
+            safe_message = sanitize_error_text(str(exc), token)
             raise CloneFailed(
-                f"Unexpected error while cloning {url!r}: {exc}"
+                f"Unexpected error while cloning {url!r}: {safe_message}"
             ) from exc
 
         logger.info("Repository cloned successfully: %s", destination)
@@ -219,6 +258,27 @@ class RepositoryManager:
             source_type=RepositorySourceType.GITLAB_REMOTE,
             identifier=url,
             local_path=destination,
+        )
+
+    # -- Cleanup ----------------------------------------------------------------
+
+    def cleanup(self, repository: RepositorySource) -> None:
+        """
+        Delete a repository obtained via `obtain_gitlab()`, if applicable.
+
+        No-op for `LOCAL_PATH` sources: a user's local repository is
+        never touched by the scanner. This guarantees the scanner
+        never permanently stores a GitLab clone, while never risking
+        deletion of anything the user pointed the scanner at directly.
+
+        Args:
+            repository: The `RepositorySource` previously returned by
+                `obtain_local()` or `obtain_gitlab()`.
+        """
+        if repository.source_type is not RepositorySourceType.GITLAB_REMOTE:
+            return
+        remove_clone(
+            repository.local_path, clone_base_directory=self._settings.clone_base_directory
         )
 
     # -- Dispatcher -----------------------------------------------------------
@@ -229,6 +289,7 @@ class RepositoryManager:
         local_path: Path | None = None,
         gitlab_url: str | None = None,
         branch: str | None = None,
+        token: str | None = None,
     ) -> RepositorySource:
         """
         Obtain a repository from exactly one source.
@@ -239,6 +300,8 @@ class RepositoryManager:
             gitlab_url: A GitLab clone URL (mutually exclusive with
                 `local_path`).
             branch: Optional branch, only meaningful with `gitlab_url`.
+            token: Optional GitLab access token, only meaningful with
+                `gitlab_url`. See `obtain_gitlab()` for handling.
 
         Returns:
             A `RepositorySource` from either `obtain_local()` or
@@ -257,7 +320,7 @@ class RepositoryManager:
             return self.obtain_local(local_path)
 
         assert gitlab_url is not None  # narrowed by the check above
-        return self.obtain_gitlab(gitlab_url, branch=branch)
+        return self.obtain_gitlab(gitlab_url, branch=branch, token=token)
 
     # -- Internal helpers -------------------------------------------------------
 
@@ -299,10 +362,18 @@ class RepositoryManager:
 
     @staticmethod
     def _translate_clone_error(
-        exc: GitCommandError, *, url: str, branch: str | None
+        exc: GitCommandError, *, url: str, branch: str | None, token: str | None = None
     ) -> RepositoryManagerError:
-        """Map a low-level GitCommandError to a specific, meaningful exception."""
-        message = str(exc).lower()
+        """
+        Map a low-level GitCommandError to a specific, meaningful exception.
+
+        `token`, if the clone attempt used one, is redacted from the
+        raw GitPython error text before any part of it is used to
+        build a message — GitCommandError otherwise echoes the full
+        command line (including the authenticated URL) back verbatim.
+        """
+        safe_text = sanitize_error_text(str(exc), token)
+        message = safe_text.lower()
 
         if branch and (
             "remote branch" in message
@@ -333,4 +404,4 @@ class RepositoryManager:
                 f"Repository not found or inaccessible: {url!r}"
             )
 
-        return CloneFailed(f"Failed to clone {url!r}: {exc}")
+        return CloneFailed(f"Failed to clone {url!r}: {safe_text}")

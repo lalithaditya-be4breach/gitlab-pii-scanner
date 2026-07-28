@@ -41,6 +41,7 @@ Usage
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from pathlib import Path
 
@@ -143,6 +144,17 @@ def build_arg_parser() -> argparse.ArgumentParser:
         help="Optional branch to check out after cloning. Defaults to the "
         "repository's default branch.",
     )
+    gitlab_parser.add_argument(
+        "--token",
+        type=str,
+        default=None,
+        help="Optional GitLab Personal Access Token, required for private "
+        "repositories. Prefer setting the GITLAB_TOKEN environment "
+        "variable instead of this flag (e.g. via a secret pipeline "
+        "variable) so the token never appears in shell history or a "
+        "process listing; if both are set, --token wins. The token is "
+        "never logged or written to any report.",
+    )
 
     return parser
 
@@ -197,14 +209,24 @@ def run(argv: list[str] | None = None) -> int:
         logger.info("Repository ready at: %s", repository.local_path)
 
     elif args.mode == "gitlab":
+        # Prefer an explicit --token, but fall back to the GITLAB_TOKEN
+        # environment variable so a token can be supplied via a secret
+        # pipeline variable rather than a CLI flag. Neither value is
+        # ever logged; only the token-free `args.url` is.
+        token = args.token or os.environ.get("GITLAB_TOKEN") or None
+
         try:
-            repository = repository_manager.obtain_gitlab(args.url, branch=args.branch)
+            repository = repository_manager.obtain_gitlab(
+                args.url, branch=args.branch, token=token
+            )
         except InvalidRepositoryURL as exc:
             logger.error("%s", exc)
             return ExitCode.INVALID_REPOSITORY_URL
         except RepositoryManagerError as exc:
             # Covers CloneFailed and its subclasses (AuthenticationFailed,
             # BranchNotFound), plus any other repository manager error.
+            # RepositoryManager guarantees this message never contains
+            # the token, even on failure.
             logger.error("%s", exc)
             return ExitCode.CLONE_FAILED
 
@@ -217,6 +239,34 @@ def run(argv: list[str] | None = None) -> int:
         logger.error("Unknown mode: %s", args.mode)
         return ExitCode.INVALID_ARGUMENTS
 
+    # The scanner must never permanently store a cloned repository, so
+    # a GitLab clone is always deleted once the pipeline below finishes
+    # -- whether it succeeds, fails partway through, or raises. Local
+    # repositories are never touched by `repository_manager.cleanup()`.
+    try:
+        return _run_pipeline(repository, settings, logger)
+    finally:
+        if args.mode == "gitlab":
+            repository_manager.cleanup(repository)
+
+
+def _run_pipeline(repository, settings, logger) -> int:  # noqa: ANN001
+    """
+    Run scanning, risk assessment, and every reporting layer.
+
+    Split out of `run()` so the GitLab clone cleanup in `run()`'s
+    `finally` block reads as "run the pipeline, then always clean up"
+    without needing to track every `return` in this function. The body
+    below is otherwise unchanged from before GitLab support was added.
+
+    Args:
+        repository: The `RepositorySource` obtained by `run()`.
+        settings: The loaded `ScannerSettings`.
+        logger: The configured application logger.
+
+    Returns:
+        A process exit code (see `ExitCode`).
+    """
     try:
         scan_engine = ScanEngine(settings=settings)
     except PIIDetectorError as exc:

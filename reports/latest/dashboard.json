@@ -1,270 +1,239 @@
 {
-  "generated_at": "2026-07-27T16:19:11.676640+00:00",
+  "generated_at": "2026-07-28T06:11:24.681436+00:00",
   "summary": {
-    "total_findings": 85387,
-    "risk_score": 252741,
+    "total_findings": 37,
+    "risk_score": 95,
     "pipeline_status": "FAIL"
   },
   "category_counts": {
-    "Secrets": 106,
-    "Personal Information": 22669,
-    "Financial Data": 7,
+    "Secrets": 0,
+    "Personal Information": 6,
+    "Financial Data": 0,
     "Authentication": 0,
-    "Medical Data": 9,
-    "Government IDs": 15,
-    "Network Information": 33596,
-    "Business Information": 28985,
+    "Medical Data": 0,
+    "Government IDs": 0,
+    "Network Information": 20,
+    "Business Information": 11,
     "Credentials": 0,
     "Other": 0
   },
   "trend": {
     "trend_available": true,
-    "previous_total_findings": 85387,
-    "current_total_findings": 85387,
+    "previous_total_findings": 37,
+    "current_total_findings": 37,
+    "difference": 0,
     "findings_delta": 0,
     "findings_trend": "unchanged",
-    "previous_risk_score": 252741,
-    "current_risk_score": 252741,
+    "previous_risk_score": 95,
+    "current_risk_score": 95,
     "risk_score_delta": 0,
     "risk_score_trend": "unchanged",
     "category_deltas": {
       "Secrets": 0,
-      "Personal Information": 0,
-      "Financial Data": 0,
-      "Authentication": 0,
-      "Medical Data": 0,
       "Government IDs": 0,
+      "Other": 0,
+      "Authentication": 0,
       "Network Information": 0,
+      "Personal Information": 0,
+      "Medical Data": 0,
       "Business Information": 0,
-      "Credentials": 0,
-      "Other": 0
+      "Financial Data": 0,
+      "Credentials": 0
     },
     "most_improved_category": null,
     "worst_category": null
   },
   "top_files": [
     {
-      "file": "frontend\\src\\assets\\private\\three.js",
-      "finding_count": 12820
+      "file": "README.md",
+      "finding_count": 33
     },
     {
-      "file": "data\\static\\i18n\\pl_PL.json",
-      "finding_count": 1960
-    },
-    {
-      "file": "data\\static\\i18n\\ro_RO.json",
-      "finding_count": 1129
-    },
-    {
-      "file": "REFERENCES.md",
-      "finding_count": 1117
-    },
-    {
-      "file": "frontend\\src\\assets\\private\\dat.gui.min.js",
-      "finding_count": 1079
-    },
-    {
-      "file": "data\\static\\i18n\\de_CH.json",
-      "finding_count": 1018
-    },
-    {
-      "file": "data\\static\\i18n\\de_DE.json",
-      "finding_count": 1006
-    },
-    {
-      "file": "data\\static\\i18n\\da_DK.json",
-      "finding_count": 904
-    },
-    {
-      "file": "data\\static\\i18n\\nl_NL.json",
-      "finding_count": 902
-    },
-    {
-      "file": "data\\static\\i18n\\es_ES.json",
-      "finding_count": 894
+      "file": "sample.py",
+      "finding_count": 4
     }
   ],
   "top_findings": [
     {
-      "finding_id": "F-000578",
-      "file": "REFERENCES.md",
-      "line_number": 473,
-      "entity_type": "CREDIT_CARD",
-      "severity": "CRITICAL"
+      "finding_id": "F-000001",
+      "file": "README.md",
+      "line_number": 14,
+      "entity_type": "PERSON",
+      "severity": "HIGH"
     },
     {
-      "finding_id": "F-000579",
-      "file": "REFERENCES.md",
-      "line_number": 494,
-      "entity_type": "CREDIT_CARD",
-      "severity": "CRITICAL"
+      "finding_id": "F-000010",
+      "file": "README.md",
+      "line_number": 62,
+      "entity_type": "PERSON",
+      "severity": "HIGH"
     },
     {
-      "finding_id": "F-003178",
-      "file": ".github\\workflows\\lock.yml",
-      "line_number": 20,
-      "entity_type": "MEDICAL_LICENSE",
-      "severity": "CRITICAL"
+      "finding_id": "F-000011",
+      "file": "README.md",
+      "line_number": 65,
+      "entity_type": "PERSON",
+      "severity": "HIGH"
     },
     {
-      "finding_id": "F-005048",
-      "file": "data\\static\\challenges.yml",
-      "line_number": 848,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000013",
+      "file": "README.md",
+      "line_number": 68,
+      "entity_type": "PERSON",
+      "severity": "HIGH"
     },
     {
-      "finding_id": "F-005532",
-      "file": "data\\static\\users.yml",
-      "line_number": 22,
-      "entity_type": "CREDIT_CARD",
-      "severity": "CRITICAL"
+      "finding_id": "F-000033",
+      "file": "sample.py",
+      "line_number": 2,
+      "entity_type": "EMAIL_ADDRESS",
+      "severity": "HIGH"
     },
     {
-      "finding_id": "F-005533",
-      "file": "data\\static\\users.yml",
-      "line_number": 26,
-      "entity_type": "CREDIT_CARD",
-      "severity": "CRITICAL"
+      "finding_id": "F-000034",
+      "file": "sample.py",
+      "line_number": 1,
+      "entity_type": "PERSON",
+      "severity": "HIGH"
     },
     {
-      "finding_id": "F-005534",
-      "file": "data\\static\\users.yml",
-      "line_number": 58,
-      "entity_type": "CREDIT_CARD",
-      "severity": "CRITICAL"
+      "finding_id": "F-000000",
+      "file": "README.md",
+      "line_number": 7,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-005535",
-      "file": "data\\static\\users.yml",
-      "line_number": 82,
-      "entity_type": "CREDIT_CARD",
-      "severity": "CRITICAL"
+      "finding_id": "F-000002",
+      "file": "README.md",
+      "line_number": 18,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-005537",
-      "file": "data\\static\\users.yml",
-      "line_number": 102,
-      "entity_type": "CREDIT_CARD",
-      "severity": "CRITICAL"
+      "finding_id": "F-000003",
+      "file": "README.md",
+      "line_number": 37,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-006963",
-      "file": "data\\static\\codefixes\\redirectChallenge_1.ts",
-      "line_number": 3,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000004",
+      "file": "README.md",
+      "line_number": 39,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-006973",
-      "file": "data\\static\\codefixes\\redirectChallenge_2.ts",
-      "line_number": 3,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000005",
+      "file": "README.md",
+      "line_number": 40,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-006984",
-      "file": "data\\static\\codefixes\\redirectChallenge_3.ts",
-      "line_number": 3,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000006",
+      "file": "README.md",
+      "line_number": 41,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-006995",
-      "file": "data\\static\\codefixes\\redirectChallenge_4_correct.ts",
-      "line_number": 3,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000007",
+      "file": "README.md",
+      "line_number": 41,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-007012",
-      "file": "data\\static\\codefixes\\redirectCryptoCurrencyChallenge_2.ts",
-      "line_number": 3,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000008",
+      "file": "README.md",
+      "line_number": 41,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-007027",
-      "file": "data\\static\\codefixes\\redirectCryptoCurrencyChallenge_4.ts",
-      "line_number": 3,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000009",
+      "file": "README.md",
+      "line_number": 42,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-007437",
-      "file": "data\\static\\i18n\\ar_SA.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000012",
+      "file": "README.md",
+      "line_number": 68,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-007438",
-      "file": "data\\static\\i18n\\ar_SA.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000014",
+      "file": "README.md",
+      "line_number": 68,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
     },
     {
-      "finding_id": "F-008077",
-      "file": "data\\static\\i18n\\az_AZ.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000015",
+      "file": "README.md",
+      "line_number": 13,
+      "entity_type": "URL",
+      "severity": "LOW"
     },
     {
-      "finding_id": "F-008078",
-      "file": "data\\static\\i18n\\az_AZ.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000016",
+      "file": "README.md",
+      "line_number": 13,
+      "entity_type": "URL",
+      "severity": "LOW"
     },
     {
-      "finding_id": "F-008740",
-      "file": "data\\static\\i18n\\bg_BG.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000017",
+      "file": "README.md",
+      "line_number": 14,
+      "entity_type": "URL",
+      "severity": "LOW"
     },
     {
-      "finding_id": "F-008741",
-      "file": "data\\static\\i18n\\bg_BG.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000018",
+      "file": "README.md",
+      "line_number": 18,
+      "entity_type": "URL",
+      "severity": "LOW"
     },
     {
-      "finding_id": "F-009365",
-      "file": "data\\static\\i18n\\bn_BD.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000019",
+      "file": "README.md",
+      "line_number": 25,
+      "entity_type": "URL",
+      "severity": "LOW"
     },
     {
-      "finding_id": "F-009366",
-      "file": "data\\static\\i18n\\bn_BD.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000020",
+      "file": "README.md",
+      "line_number": 29,
+      "entity_type": "URL",
+      "severity": "LOW"
     },
     {
-      "finding_id": "F-009990",
-      "file": "data\\static\\i18n\\ca_ES.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000021",
+      "file": "README.md",
+      "line_number": 30,
+      "entity_type": "URL",
+      "severity": "LOW"
     },
     {
-      "finding_id": "F-009991",
-      "file": "data\\static\\i18n\\ca_ES.json",
-      "line_number": 169,
-      "entity_type": "CRYPTO",
-      "severity": "CRITICAL"
+      "finding_id": "F-000022",
+      "file": "README.md",
+      "line_number": 31,
+      "entity_type": "URL",
+      "severity": "LOW"
     }
   ],
   "severity_distribution": {
-    "LOW": 38334,
-    "MEDIUM": 28985,
-    "HIGH": 17946,
-    "CRITICAL": 122
+    "LOW": 20,
+    "MEDIUM": 11,
+    "HIGH": 6,
+    "CRITICAL": 0
   }
 }

@@ -1,0 +1,271 @@
+{
+  "generated_at": "2026-07-28T04:24:57.365995+00:00",
+  "summary": {
+    "total_findings": 89428,
+    "risk_score": 261896,
+    "pipeline_status": "FAIL"
+  },
+  "category_counts": {
+    "Secrets": 106,
+    "Personal Information": 23135,
+    "Financial Data": 12,
+    "Authentication": 0,
+    "Medical Data": 9,
+    "Government IDs": 26,
+    "Network Information": 35680,
+    "Business Information": 30460,
+    "Credentials": 0,
+    "Other": 0
+  },
+  "trend": {
+    "trend_available": true,
+    "previous_total_findings": 85387,
+    "current_total_findings": 89428,
+    "difference": 4041,
+    "findings_delta": 4041,
+    "findings_trend": "increased",
+    "previous_risk_score": 252741,
+    "current_risk_score": 261896,
+    "risk_score_delta": 9155,
+    "risk_score_trend": "increased",
+    "category_deltas": {
+      "Other": 0,
+      "Authentication": 0,
+      "Credentials": 0,
+      "Business Information": 1475,
+      "Medical Data": 0,
+      "Secrets": 0,
+      "Personal Information": 466,
+      "Financial Data": 5,
+      "Government IDs": 11,
+      "Network Information": 2084
+    },
+    "most_improved_category": null,
+    "worst_category": "Network Information"
+  },
+  "top_files": [
+    {
+      "file": "juice-shop\\frontend\\src\\assets\\private\\three.js",
+      "finding_count": 12820
+    },
+    {
+      "file": "juice-shop\\data\\static\\i18n\\pl_PL.json",
+      "finding_count": 1960
+    },
+    {
+      "file": "juice-shop\\data\\static\\i18n\\ro_RO.json",
+      "finding_count": 1129
+    },
+    {
+      "file": "juice-shop\\REFERENCES.md",
+      "finding_count": 1117
+    },
+    {
+      "file": "juice-shop\\frontend\\src\\assets\\private\\dat.gui.min.js",
+      "finding_count": 1079
+    },
+    {
+      "file": "juice-shop\\data\\static\\i18n\\de_CH.json",
+      "finding_count": 1018
+    },
+    {
+      "file": "juice-shop\\data\\static\\i18n\\de_DE.json",
+      "finding_count": 1006
+    },
+    {
+      "file": "juice-shop\\data\\static\\i18n\\da_DK.json",
+      "finding_count": 904
+    },
+    {
+      "file": "juice-shop\\data\\static\\i18n\\nl_NL.json",
+      "finding_count": 902
+    },
+    {
+      "file": "juice-shop\\data\\static\\i18n\\es_ES.json",
+      "finding_count": 894
+    }
+  ],
+  "top_findings": [
+    {
+      "finding_id": "F-000001",
+      "file": ".validation_run.py",
+      "line_number": 96,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-000003",
+      "file": ".validation_run.py",
+      "line_number": 117,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-001334",
+      "file": "juice-shop\\REFERENCES.md",
+      "line_number": 473,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-001335",
+      "file": "juice-shop\\REFERENCES.md",
+      "line_number": 494,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-003934",
+      "file": "juice-shop\\.github\\workflows\\lock.yml",
+      "line_number": 20,
+      "entity_type": "MEDICAL_LICENSE",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-005804",
+      "file": "juice-shop\\data\\static\\challenges.yml",
+      "line_number": 848,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-006288",
+      "file": "juice-shop\\data\\static\\users.yml",
+      "line_number": 22,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-006289",
+      "file": "juice-shop\\data\\static\\users.yml",
+      "line_number": 26,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-006290",
+      "file": "juice-shop\\data\\static\\users.yml",
+      "line_number": 58,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-006291",
+      "file": "juice-shop\\data\\static\\users.yml",
+      "line_number": 82,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-006293",
+      "file": "juice-shop\\data\\static\\users.yml",
+      "line_number": 102,
+      "entity_type": "CREDIT_CARD",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-007719",
+      "file": "juice-shop\\data\\static\\codefixes\\redirectChallenge_1.ts",
+      "line_number": 3,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-007729",
+      "file": "juice-shop\\data\\static\\codefixes\\redirectChallenge_2.ts",
+      "line_number": 3,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-007740",
+      "file": "juice-shop\\data\\static\\codefixes\\redirectChallenge_3.ts",
+      "line_number": 3,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-007751",
+      "file": "juice-shop\\data\\static\\codefixes\\redirectChallenge_4_correct.ts",
+      "line_number": 3,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-007768",
+      "file": "juice-shop\\data\\static\\codefixes\\redirectCryptoCurrencyChallenge_2.ts",
+      "line_number": 3,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-007783",
+      "file": "juice-shop\\data\\static\\codefixes\\redirectCryptoCurrencyChallenge_4.ts",
+      "line_number": 3,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-008193",
+      "file": "juice-shop\\data\\static\\i18n\\ar_SA.json",
+      "line_number": 169,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-008194",
+      "file": "juice-shop\\data\\static\\i18n\\ar_SA.json",
+      "line_number": 169,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-008833",
+      "file": "juice-shop\\data\\static\\i18n\\az_AZ.json",
+      "line_number": 169,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-008834",
+      "file": "juice-shop\\data\\static\\i18n\\az_AZ.json",
+      "line_number": 169,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-009496",
+      "file": "juice-shop\\data\\static\\i18n\\bg_BG.json",
+      "line_number": 169,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-009497",
+      "file": "juice-shop\\data\\static\\i18n\\bg_BG.json",
+      "line_number": 169,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-010121",
+      "file": "juice-shop\\data\\static\\i18n\\bn_BD.json",
+      "line_number": 169,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-010122",
+      "file": "juice-shop\\data\\static\\i18n\\bn_BD.json",
+      "line_number": 169,
+      "entity_type": "CRYPTO",
+      "severity": "CRITICAL"
+    }
+  ],
+  "severity_distribution": {
+    "LOW": 40546,
+    "MEDIUM": 30460,
+    "HIGH": 18295,
+    "CRITICAL": 127
+  }
+}

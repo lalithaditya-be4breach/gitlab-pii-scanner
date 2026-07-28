@@ -1,0 +1,200 @@
+# azure-pipelines-gitlab.yml
+#
+# Azure DevOps pipeline: scan ANY GitLab repository with the existing
+# GitLab PII Scanner, without checking that repository into Azure
+# Repos and without modifying the scanner per target repo.
+#
+# This pipeline never checks out this project's own source via the
+# normal `trigger:`/`checkout: self` mechanism against a GitLab repo --
+# it runs entirely against THIS repository (where the scanner lives),
+# then hands the scanner a GitLab URL/token/branch supplied at
+# "Run pipeline" time. The scanner (scanner/gitlab/, unchanged
+# elsewhere) does the actual cloning, into a temp directory it deletes
+# itself when finished -- see main.py's `finally` block.
+#
+# This is manual-trigger only: `trigger: none` / `pr: none`. Wire up a
+# scheduled trigger or a webhook later if unattended runs are wanted;
+# nothing about this pipeline design requires manual triggering.
+
+trigger: none
+pr: none
+
+pool:
+  vmImage: "ubuntu-latest"
+
+# ---------------------------------------------------------------------
+# Parameters shown on the "Run pipeline" dialog.
+#
+# The GitLab Personal Access Token is deliberately NOT a parameter
+# here. Azure DevOps does not mask `parameters:` values in the log --
+# anything typed into a parameter is visible in plain text in the run
+# summary and, if echoed anywhere, in the log. A token must never be
+# capturable that way.
+#
+# Instead, configure GITLAB_TOKEN as a **secret pipeline variable**:
+#   Pipelines -> this pipeline -> Edit -> Variables -> New variable
+#     Name: GITLAB_TOKEN
+#     Keep this value secret: YES
+#     Settable at queue time: YES  (lets you override it per run from
+#                                   "Run pipeline" without editing YAML)
+# Azure DevOps automatically masks a secret variable's value in the
+# log (replaced with "***") wherever it would otherwise appear, which
+# `parameters:` values do not get.
+#
+# For a public GitLab repository, leave GITLAB_TOKEN unset/empty --
+# the scanner treats a missing token as "no authentication needed".
+# ---------------------------------------------------------------------
+parameters:
+  - name: gitlabRepoUrl
+    displayName: "GitLab repository URL (e.g. https://gitlab.com/group/project.git)"
+    type: string
+  - name: gitlabBranch
+    displayName: "Branch (optional -- leave blank for the repository's default branch)"
+    type: string
+    default: ""
+
+variables:
+  pythonVersion: "3.11"
+
+  # Scanner configuration -- identical to azure-pipelines.yml (local
+  # scanning) so both pipelines produce reports under the same shape.
+  SCANNER_ENVIRONMENT: "ci"
+  SCANNER_OUTPUT_DIR: "$(Build.SourcesDirectory)"
+  PRESIDIO_SPACY_MODEL: "en_core_web_lg"
+  RISK_WARNING_THRESHOLD: "20"
+  RISK_FAIL_THRESHOLD: "50"
+  REPORT_REDACTION_ENABLED: "true"
+
+  # AI configuration
+  AI_PROVIDER: "null"
+  AI_MODEL: "gpt-4o-mini"
+
+  # GITLAB_TOKEN is NOT declared here on purpose -- see the comment
+  # above `parameters:`. It must come from a secret pipeline variable
+  # (or a linked variable group) so Azure DevOps masks it in the log.
+
+steps:
+
+# ------------------------------------------------------------------
+# Python
+# ------------------------------------------------------------------
+
+- task: UsePythonVersion@0
+  displayName: "Use Python $(pythonVersion)"
+  inputs:
+    versionSpec: "$(pythonVersion)"
+    addToPath: true
+
+# ------------------------------------------------------------------
+# Cache
+# ------------------------------------------------------------------
+
+- task: Cache@2
+  displayName: "Cache pip packages"
+  inputs:
+    key: 'python | "$(Agent.OS)" | requirements.txt'
+    restoreKeys: |
+      python | "$(Agent.OS)"
+    path: "$(Pipeline.Workspace)/.pip-cache"
+
+# ------------------------------------------------------------------
+# Install dependencies
+# ------------------------------------------------------------------
+
+- script: |
+    python -m pip install --upgrade pip
+    pip install \
+      --cache-dir "$(Pipeline.Workspace)/.pip-cache" \
+      -r requirements.txt
+  displayName: "Install dependencies"
+
+# ------------------------------------------------------------------
+# Download spaCy model
+# ------------------------------------------------------------------
+
+- script: |
+    python -m spacy download "$(PRESIDIO_SPACY_MODEL)"
+  displayName: "Download spaCy model"
+
+# ------------------------------------------------------------------
+# Run unit tests
+# ------------------------------------------------------------------
+
+- script: |
+    pytest -rs
+  displayName: "Run unit tests"
+
+# ------------------------------------------------------------------
+# Clone the GitLab repository and run the EXISTING scanner on it
+# ------------------------------------------------------------------
+#
+# No manual `git clone` step here: `python main.py gitlab ...` does
+# the cloning itself (scanner/gitlab/), into a temp directory under
+# output/cloned_repositories/, and deletes it again once scanning and
+# every report have been generated -- success or failure. This script
+# never echoes $(GITLAB_TOKEN); it is only ever read by main.py via
+# the environment, and main.py never logs it.
+
+- script: |
+    set -e
+
+    echo "=============================================="
+    echo "Scanning GitLab repository..."
+    echo "=============================================="
+
+    BRANCH_ARGS=()
+    if [ -n "${{ parameters.gitlabBranch }}" ]; then
+      BRANCH_ARGS=(--branch "${{ parameters.gitlabBranch }}")
+    fi
+
+    python main.py gitlab \
+      --url "${{ parameters.gitlabRepoUrl }}" \
+      "${BRANCH_ARGS[@]}"
+
+    echo ""
+    echo "=============================================="
+    echo "Scanner finished successfully"
+    echo "=============================================="
+
+    echo ""
+    echo "Searching for ALL generated reports..."
+    find "$(Build.SourcesDirectory)" -type f | grep -Ei \
+      "scan_report.json|dashboard.json|AI_Summary.md|Developer_Guidance.md|Executive_Report.html|Dashboard.html" || true
+
+    echo ""
+    echo "Searching for report directories..."
+    find "$(Build.SourcesDirectory)" -type d | grep -Ei \
+      "reports|output" || true
+
+    echo ""
+    echo "Confirming the temporary clone was deleted..."
+    if [ -d "$(Build.SourcesDirectory)/output/cloned_repositories" ] && \
+       [ -n "$(ls -A "$(Build.SourcesDirectory)/output/cloned_repositories" 2>/dev/null)" ]; then
+      echo "WARNING: cloned_repositories/ is not empty -- a clone may not have been cleaned up."
+    else
+      echo "OK: no cloned repositories remain on disk."
+    fi
+  displayName: "Clone GitLab repository and run GitLab PII Scanner"
+  env:
+    GITLAB_TOKEN: $(GITLAB_TOKEN)
+    AI_API_KEY: $(AI_API_KEY)
+    AI_AZURE_ENDPOINT: $(AI_AZURE_ENDPOINT)
+
+# ------------------------------------------------------------------
+# Evaluate the EXISTING security gate
+# ------------------------------------------------------------------
+
+- script: |
+    python ci/evaluate_gate.py --report-path "$(Build.SourcesDirectory)/reports/latest/scan_report.json"
+  displayName: "Evaluate Security Gate"
+
+# ------------------------------------------------------------------
+# Publish the EXISTING reports
+# ------------------------------------------------------------------
+
+- task: PublishPipelineArtifact@1
+  displayName: "Publish Reports"
+  condition: always()
+  inputs:
+    targetPath: "$(Build.SourcesDirectory)/reports"
+    artifact: "pii-scan-reports-gitlab"

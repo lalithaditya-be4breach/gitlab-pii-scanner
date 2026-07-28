@@ -1,0 +1,366 @@
+{
+  "schema_version": "1.0",
+  "scanner_version": "0.4.0",
+  "repository": {
+    "identifier": "https://gitlab.com/be4breach-group/gitlab-private-test.git",
+    "source_type": "GITLAB_REMOTE",
+    "local_path": "D:\\gitlab-pii-scanner\\output\\cloned_repositories\\gitlab-private-test-497be746"
+  },
+  "scan": {
+    "started_at": "2026-07-28T05:57:33.630699+00:00",
+    "finished_at": "2026-07-28T05:57:34.088621+00:00",
+    "duration_seconds": 0.457922,
+    "files_scanned": 2,
+    "files_skipped": 0
+  },
+  "summary": {
+    "total_findings": 37,
+    "severity_counts": {
+      "LOW": 20,
+      "MEDIUM": 11,
+      "HIGH": 6,
+      "CRITICAL": 0
+    },
+    "risk_score": 95,
+    "pipeline_status": "FAIL",
+    "risk_thresholds": {
+      "warning": 20,
+      "fail": 50
+    }
+  },
+  "findings": [
+    {
+      "file": "README.md",
+      "line_number": 7,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "**tLab",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 14,
+      "entity_type": "PERSON",
+      "confidence_score": 0.85,
+      "severity": "HIGH",
+      "matched_value": "***",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 18,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "******************************************************.git",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 37,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "**tLab",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 39,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "*****b CI",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 40,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "*******************************ting",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 41,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "****** EC2",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 41,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "****** ECS",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 41,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "********************************.com",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 42,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "******************************************.com",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 62,
+      "entity_type": "PERSON",
+      "confidence_score": 0.85,
+      "severity": "HIGH",
+      "matched_value": "***elds",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 65,
+      "entity_type": "PERSON",
+      "confidence_score": 0.85,
+      "severity": "HIGH",
+      "matched_value": "*****nema",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 68,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "****",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 68,
+      "entity_type": "PERSON",
+      "confidence_score": 0.85,
+      "severity": "HIGH",
+      "matched_value": "*uGet",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 68,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "****brew",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 13,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "*********************************************************************file",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 13,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "*********************************************************************file",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 14,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "***********************************************************************tory",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 18,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "******************************************************.git",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 25,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "**************************************************************************ions",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 29,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "*****************************************ers/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 30,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "************************************************************************sts/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 31,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "*************************************************************************************ally",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 32,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "**********************************************************als/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 33,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "***********************************************************rge/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 39,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "***********************************art/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 40,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "***************************************************ast/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 41,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "***************************************************nts/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 42,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "****************************************ent/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 43,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "***********************************************************nts/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 49,
+      "entity_type": "URL",
+      "confidence_score": 0.6,
+      "severity": "LOW",
+      "matched_value": "************************com/",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 9,
+      "entity_type": "URL",
+      "confidence_score": 0.5,
+      "severity": "LOW",
+      "matched_value": "*****E.md",
+      "redacted": true
+    },
+    {
+      "file": "README.md",
+      "line_number": 49,
+      "entity_type": "URL",
+      "confidence_score": 0.5,
+      "severity": "LOW",
+      "matched_value": "***********.com",
+      "redacted": true
+    },
+    {
+      "file": "sample.py",
+      "line_number": 2,
+      "entity_type": "EMAIL_ADDRESS",
+      "confidence_score": 1.0,
+      "severity": "HIGH",
+      "matched_value": "jo***@example.com",
+      "redacted": true
+    },
+    {
+      "file": "sample.py",
+      "line_number": 1,
+      "entity_type": "PERSON",
+      "confidence_score": 0.85,
+      "severity": "HIGH",
+      "matched_value": "******mith",
+      "redacted": true
+    },
+    {
+      "file": "sample.py",
+      "line_number": 2,
+      "entity_type": "URL",
+      "confidence_score": 0.5,
+      "severity": "LOW",
+      "matched_value": "***n.sm",
+      "redacted": true
+    },
+    {
+      "file": "sample.py",
+      "line_number": 2,
+      "entity_type": "URL",
+      "confidence_score": 0.5,
+      "severity": "LOW",
+      "matched_value": "*******.com",
+      "redacted": true
+    }
+  ]
+}
