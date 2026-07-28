@@ -21,7 +21,7 @@ pool:
   vmImage: "ubuntu-latest"
 
 variables:
-  pythonVersion: "3.11"
+  pythonVersion: "3.12"
 
   # Scanner configuration
   SCANNER_ENVIRONMENT: "ci"
