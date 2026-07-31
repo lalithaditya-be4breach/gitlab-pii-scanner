@@ -182,6 +182,35 @@ def test_unknown_entity_type_defaults_to_medium_severity(tmp_path: Path) -> None
     assert findings[0].severity == Severity.MEDIUM
 
 
+def test_analyze_file_applies_repository_precision_validation(tmp_path: Path) -> None:
+    """Broad NLP entities in public repo docs are filtered before findings are created."""
+    text = "Thanks John Doe for reporting this issue.\nemail: admin@example.com\n"
+    person_start = text.index("John Doe")
+    email_start = text.index("admin@example.com")
+    fake_engine = _FakeAnalyzerEngine(
+        [
+            _FakeResult(
+                entity_type="PERSON",
+                start=person_start,
+                end=person_start + len("John Doe"),
+                score=0.9,
+            ),
+            _FakeResult(
+                entity_type="EMAIL_ADDRESS",
+                start=email_start,
+                end=email_start + len("admin@example.com"),
+                score=0.9,
+            ),
+        ]
+    )
+    settings = _build_test_settings(tmp_path)
+    detector = PIIDetector(settings=settings, analyzer_engine=fake_engine)
+
+    findings = detector.analyze_file(_scanned_file(tmp_path, "CHANGELOG.md"), text)
+
+    assert [finding.entity_type for finding in findings] == ["EMAIL_ADDRESS"]
+
+
 def test_missing_presidio_analyzer_raises_pii_detector_error(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

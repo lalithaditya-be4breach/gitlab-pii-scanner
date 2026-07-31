@@ -2,23 +2,65 @@
 
 ## Executive Summary
 
-This developer guidance report accompanies the PII scan of https://gitlab.com/be4breach-group/gitlab-private-test.git. It explains, for each detected issue, why it was flagged and how to fix it -- the risk score and pipeline status themselves are decided exclusively by the deterministic risk engine and are reproduced here for reference only.
+This developer guidance report accompanies the PII scan of https://github.com/pallets/click.git. It explains, for each detected issue, why it was flagged and how to fix it -- the risk score and pipeline status themselves are decided exclusively by the deterministic risk engine and are reproduced here for reference only.
 
 ## Risk Score & Overall Severity
 
-- **Risk score:** 95 (warning >= 20, fail >= 50)
+- **Risk score:** 182 (warning >= 20, fail >= 50)
 - **Pipeline status:** FAIL
-- **Total findings:** 37
+- **Total findings:** 26
 - **Overall severity breakdown:**
-  - High: 6
-  - Medium: 11
-  - Low: 20
+  - Critical: 3
+  - High: 17
+  - Medium: 6
 
 ## Detected Issues, Root Cause & Recommended Fix
 
+### F-000000 - MEDICAL_LICENSE [CRITICAL]
+
+- **Location:** .github\workflows\lock.yaml:22
+- **Category:** Medical Data
+- **Detection confidence:** 1.0
+- **Root cause:** A medical license number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real practitioner's license number in a fixture instead of a synthetic value.
+- **Security impact:** Exposure can support impersonation of a licensed medical professional or fraudulent billing.
+- **Recommended fix:** Remove hardcoded medical license numbers and replace with synthetic test data.
+- **Security best practice:** Never hardcode medical license numbers; use synthetic practitioner data in tests.
+- **OWASP:** OWASP A01:2021 - Broken Access Control
+- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
+
+### F-000011 - UK_NHS [CRITICAL]
+
+- **Location:** tests\test_basic.py:325
+- **Category:** Medical Data
+- **Detection confidence:** 1.0
+- **Root cause:** A UK National Health Service number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real patient record for local testing instead of synthetic health data.
+- **Security impact:** NHS numbers link directly to an individual's medical history; exposure is a health-data (special category) privacy incident.
+- **Recommended fix:** Remove hardcoded NHS numbers and replace with synthetic test data; treat as sensitive health-related identifier.
+- **Security best practice:** Never hardcode health-system identifiers; use synthetic patient data in tests.
+- **OWASP:** OWASP A01:2021 - Broken Access Control
+- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
+
+### F-000021 - UK_NHS [CRITICAL]
+
+- **Location:** tests\test_defaults.py:551
+- **Category:** Medical Data
+- **Detection confidence:** 1.0
+- **Root cause:** A UK National Health Service number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real patient record for local testing instead of synthetic health data.
+- **Security impact:** NHS numbers link directly to an individual's medical history; exposure is a health-data (special category) privacy incident.
+- **Recommended fix:** Remove hardcoded NHS numbers and replace with synthetic test data; treat as sensitive health-related identifier.
+- **Security best practice:** Never hardcode health-system identifiers; use synthetic patient data in tests.
+- **OWASP:** OWASP A01:2021 - Broken Access Control
+- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
+
 ### F-000001 - PERSON [HIGH]
 
-- **Location:** README.md:14
+- **Location:** docs\click-concepts.md:32
 - **Category:** Personal Information
 - **Detection confidence:** 0.85
 - **Root cause:** A real person's name was left in source code, comments, fixtures, or logs instead of a synthetic placeholder.
@@ -30,9 +72,9 @@ This developer guidance report accompanies the PII scan of https://gitlab.com/be
 - **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
 
-### F-000010 - PERSON [HIGH]
+### F-000002 - PERSON [HIGH]
 
-- **Location:** README.md:62
+- **Location:** docs\click-concepts.md:32
 - **Category:** Personal Information
 - **Detection confidence:** 0.85
 - **Root cause:** A real person's name was left in source code, comments, fixtures, or logs instead of a synthetic placeholder.
@@ -44,37 +86,37 @@ This developer guidance report accompanies the PII scan of https://gitlab.com/be
 - **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
 
-### F-000011 - PERSON [HIGH]
+### F-000003 - IP_ADDRESS [HIGH]
 
-- **Location:** README.md:65
-- **Category:** Personal Information
-- **Detection confidence:** 0.85
-- **Root cause:** A real person's name was left in source code, comments, fixtures, or logs instead of a synthetic placeholder.
-- **Likely developer mistake:** Using a real customer's or colleague's name in an example, test fixture, or code comment.
-- **Security impact:** Real names, especially combined with other findings (email, phone, location), increase re-identification risk.
-- **Recommended fix:** Replace real customer/employee names in code, comments, and test fixtures with synthetic test data.
-- **Security best practice:** Use synthetic names in code, comments, and test fixtures.
-- **OWASP:** OWASP A01:2021 - Broken Access Control
-- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
+- **Location:** docs\commands.md:334
+- **Category:** Network Information
+- **Detection confidence:** 0.6
+- **Root cause:** An IP address was hardcoded into source or configuration instead of being read from environment-specific config.
+- **Likely developer mistake:** Hardcoding a real internal or customer-facing IP address while debugging network connectivity.
+- **Security impact:** Hardcoded internal IPs can reveal network topology to anyone with repository access, aiding reconnaissance.
+- **Recommended fix:** Replace real IP addresses in code/config with placeholder or documentation-reserved ranges; move any environment-specific addresses into configuration/secrets rather than source.
+- **Security best practice:** Move environment-specific IP addresses into configuration or secrets management rather than hardcoding in source.
+- **OWASP:** OWASP A05:2021 - Security Misconfiguration
+- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A05_2021-Security_Misconfiguration/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000013 - PERSON [HIGH]
+### F-000004 - IP_ADDRESS [HIGH]
 
-- **Location:** README.md:68
-- **Category:** Personal Information
-- **Detection confidence:** 0.85
-- **Root cause:** A real person's name was left in source code, comments, fixtures, or logs instead of a synthetic placeholder.
-- **Likely developer mistake:** Using a real customer's or colleague's name in an example, test fixture, or code comment.
-- **Security impact:** Real names, especially combined with other findings (email, phone, location), increase re-identification risk.
-- **Recommended fix:** Replace real customer/employee names in code, comments, and test fixtures with synthetic test data.
-- **Security best practice:** Use synthetic names in code, comments, and test fixtures.
-- **OWASP:** OWASP A01:2021 - Broken Access Control
-- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
+- **Location:** docs\commands.md:411
+- **Category:** Network Information
+- **Detection confidence:** 0.6
+- **Root cause:** An IP address was hardcoded into source or configuration instead of being read from environment-specific config.
+- **Likely developer mistake:** Hardcoding a real internal or customer-facing IP address while debugging network connectivity.
+- **Security impact:** Hardcoded internal IPs can reveal network topology to anyone with repository access, aiding reconnaissance.
+- **Recommended fix:** Replace real IP addresses in code/config with placeholder or documentation-reserved ranges; move any environment-specific addresses into configuration/secrets rather than source.
+- **Security best practice:** Move environment-specific IP addresses into configuration or secrets management rather than hardcoding in source.
+- **OWASP:** OWASP A05:2021 - Security Misconfiguration
+- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A05_2021-Security_Misconfiguration/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000033 - EMAIL_ADDRESS [HIGH]
+### F-000006 - EMAIL_ADDRESS [HIGH]
 
-- **Location:** sample.py:2
+- **Location:** docs\standalone-apps.md:69
 - **Category:** Personal Information
 - **Detection confidence:** 1.0
 - **Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.
@@ -86,221 +128,182 @@ This developer guidance report accompanies the PII scan of https://gitlab.com/be
 - **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000034 - PERSON [HIGH]
+### F-000008 - US_DRIVER_LICENSE [HIGH]
 
-- **Location:** sample.py:1
-- **Category:** Personal Information
-- **Detection confidence:** 0.85
-- **Root cause:** A real person's name was left in source code, comments, fixtures, or logs instead of a synthetic placeholder.
-- **Likely developer mistake:** Using a real customer's or colleague's name in an example, test fixture, or code comment.
-- **Security impact:** Real names, especially combined with other findings (email, phone, location), increase re-identification risk.
-- **Recommended fix:** Replace real customer/employee names in code, comments, and test fixtures with synthetic test data.
-- **Security best practice:** Use synthetic names in code, comments, and test fixtures.
+- **Location:** docs\utils.md:26
+- **Category:** Government IDs
+- **Detection confidence:** 0.65
+- **Root cause:** A U.S. driver's license number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real individual's license number for identity verification test fixtures.
+- **Security impact:** Driver's license numbers are a common secondary identity document used in identity-theft and fraud schemes.
+- **Recommended fix:** Remove hardcoded driver's license numbers and replace with synthetic test data.
+- **Security best practice:** Never hardcode driver's license numbers; use synthetic identity documents in tests.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
 - **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
 
-### F-000000 - ORGANIZATION [MEDIUM]
+### F-000009 - US_DRIVER_LICENSE [HIGH]
 
-- **Location:** README.md:7
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** docs\utils.md:26
+- **Category:** Government IDs
+- **Detection confidence:** 0.65
+- **Root cause:** A U.S. driver's license number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real individual's license number for identity verification test fixtures.
+- **Security impact:** Driver's license numbers are a common secondary identity document used in identity-theft and fraud schemes.
+- **Recommended fix:** Remove hardcoded driver's license numbers and replace with synthetic test data.
+- **Security best practice:** Never hardcode driver's license numbers; use synthetic identity documents in tests.
+- **OWASP:** OWASP A01:2021 - Broken Access Control
+- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
+
+### F-000012 - US_DRIVER_LICENSE [HIGH]
+
+- **Location:** tests\test_basic.py:253
+- **Category:** Government IDs
+- **Detection confidence:** 0.65
+- **Root cause:** A U.S. driver's license number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real individual's license number for identity verification test fixtures.
+- **Security impact:** Driver's license numbers are a common secondary identity document used in identity-theft and fraud schemes.
+- **Recommended fix:** Remove hardcoded driver's license numbers and replace with synthetic test data.
+- **Security best practice:** Never hardcode driver's license numbers; use synthetic identity documents in tests.
+- **OWASP:** OWASP A01:2021 - Broken Access Control
+- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
+
+### F-000015 - EMAIL_ADDRESS [HIGH]
+
+- **Location:** tests\test_defaults.py:174
+- **Category:** Personal Information
+- **Detection confidence:** 1.0
+- **Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.
+- **Likely developer mistake:** Copy-pasting a real user's email address into a test fixture, example, or debug log statement.
+- **Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.
+- **Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).
+- **Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
 - **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000002 - ORGANIZATION [MEDIUM]
+### F-000016 - EMAIL_ADDRESS [HIGH]
 
-- **Location:** README.md:18
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** tests\test_defaults.py:174
+- **Category:** Personal Information
+- **Detection confidence:** 1.0
+- **Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.
+- **Likely developer mistake:** Copy-pasting a real user's email address into a test fixture, example, or debug log statement.
+- **Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.
+- **Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).
+- **Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
 - **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000003 - ORGANIZATION [MEDIUM]
+### F-000017 - EMAIL_ADDRESS [HIGH]
 
-- **Location:** README.md:37
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** tests\test_defaults.py:176
+- **Category:** Personal Information
+- **Detection confidence:** 1.0
+- **Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.
+- **Likely developer mistake:** Copy-pasting a real user's email address into a test fixture, example, or debug log statement.
+- **Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.
+- **Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).
+- **Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
 - **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000004 - ORGANIZATION [MEDIUM]
+### F-000018 - EMAIL_ADDRESS [HIGH]
 
-- **Location:** README.md:39
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** tests\test_defaults.py:452
+- **Category:** Personal Information
+- **Detection confidence:** 1.0
+- **Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.
+- **Likely developer mistake:** Copy-pasting a real user's email address into a test fixture, example, or debug log statement.
+- **Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.
+- **Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).
+- **Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
 - **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000005 - ORGANIZATION [MEDIUM]
+### F-000019 - EMAIL_ADDRESS [HIGH]
 
-- **Location:** README.md:40
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** tests\test_defaults.py:457
+- **Category:** Personal Information
+- **Detection confidence:** 1.0
+- **Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.
+- **Likely developer mistake:** Copy-pasting a real user's email address into a test fixture, example, or debug log statement.
+- **Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.
+- **Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).
+- **Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
 - **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000006 - ORGANIZATION [MEDIUM]
+### F-000020 - EMAIL_ADDRESS [HIGH]
 
-- **Location:** README.md:41
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** tests\test_defaults.py:463
+- **Category:** Personal Information
+- **Detection confidence:** 1.0
+- **Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.
+- **Likely developer mistake:** Copy-pasting a real user's email address into a test fixture, example, or debug log statement.
+- **Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.
+- **Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).
+- **Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
 - **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
 - **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
 
-### F-000007 - ORGANIZATION [MEDIUM]
+### F-000022 - US_DRIVER_LICENSE [HIGH]
 
-- **Location:** README.md:41
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** tests\test_options.py:825
+- **Category:** Government IDs
+- **Detection confidence:** 0.65
+- **Root cause:** A U.S. driver's license number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real individual's license number for identity verification test fixtures.
+- **Security impact:** Driver's license numbers are a common secondary identity document used in identity-theft and fraud schemes.
+- **Recommended fix:** Remove hardcoded driver's license numbers and replace with synthetic test data.
+- **Security best practice:** Never hardcode driver's license numbers; use synthetic identity documents in tests.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
-- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
+- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
 
-### F-000008 - ORGANIZATION [MEDIUM]
+### F-000024 - US_DRIVER_LICENSE [HIGH]
 
-- **Location:** README.md:41
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** tests\test_utils\test_echo.py:15
+- **Category:** Government IDs
+- **Detection confidence:** 0.65
+- **Root cause:** A U.S. driver's license number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real individual's license number for identity verification test fixtures.
+- **Security impact:** Driver's license numbers are a common secondary identity document used in identity-theft and fraud schemes.
+- **Recommended fix:** Remove hardcoded driver's license numbers and replace with synthetic test data.
+- **Security best practice:** Never hardcode driver's license numbers; use synthetic identity documents in tests.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
-- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
+- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
 
-### F-000009 - ORGANIZATION [MEDIUM]
+### F-000025 - US_DRIVER_LICENSE [HIGH]
 
-- **Location:** README.md:42
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
+- **Location:** tests\test_utils\test_echo.py:15
+- **Category:** Government IDs
+- **Detection confidence:** 0.65
+- **Root cause:** A U.S. driver's license number was committed directly into source or test data.
+- **Likely developer mistake:** Reusing a real individual's license number for identity verification test fixtures.
+- **Security impact:** Driver's license numbers are a common secondary identity document used in identity-theft and fraud schemes.
+- **Recommended fix:** Remove hardcoded driver's license numbers and replace with synthetic test data.
+- **Security best practice:** Never hardcode driver's license numbers; use synthetic identity documents in tests.
 - **OWASP:** OWASP A01:2021 - Broken Access Control
-- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
+- **CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor
+- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html
 
-### F-000012 - ORGANIZATION [MEDIUM]
-
-- **Location:** README.md:68
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
-- **OWASP:** OWASP A01:2021 - Broken Access Control
-- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
-
-### F-000014 - ORGANIZATION [MEDIUM]
-
-- **Location:** README.md:68
-- **Category:** Business Information
-- **Detection confidence:** 0.85
-- **Root cause:** An organization or company name was detected within repository content. While organization names are often public, they may reveal confidential customers, partners, internal projects, suppliers, or business relationships when committed into source code, documentation, logs, or datasets.
-- **Likely developer mistake:** Committing customer datasets, internal business documentation, vendor information, project documentation, exported reports, or test datasets containing real organizations.
-- **Security impact:** Organization names can disclose confidential partners or customers, reveal business relationships, expose internal organizational metadata, or provide competitive intelligence.
-- **Recommended fix:** Review detected organization names to confirm they are intended to be public. Replace confidential customer, partner, vendor, supplier, or internal project names with synthetic values in source, documentation, logs, and test datasets.
-- **Security best practice:** Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
-- **OWASP:** OWASP A01:2021 - Broken Access Control
-- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html
-
-### F-000015 - URL [LOW]
-
-- **Location:** README.md:13
-- **Category:** Network Information
-- **Detection confidence:** 0.6
-- **Root cause:** A URL embedded in source or configuration may contain credentials, internal-only hostnames, or other environment-specific detail that does not belong in code.
-- **Likely developer mistake:** Hardcoding an environment-specific or credentialed URL instead of building it from configuration/secrets at runtime.
-- **Security impact:** URLs containing embedded credentials or internal hostnames can leak access or aid reconnaissance if the repository is exposed.
-- **Recommended fix:** Review embedded URLs for credentials or internal-only endpoints; move environment-specific URLs into configuration.
-- **Security best practice:** Move environment-specific or credentialed URLs into configuration/secrets rather than hardcoding in source.
-- **OWASP:** OWASP A05:2021 - Security Misconfiguration
-- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A05_2021-Security_Misconfiguration/, https://cwe.mitre.org/data/definitions/200.html
-
-### F-000016 - URL [LOW]
-
-- **Location:** README.md:13
-- **Category:** Network Information
-- **Detection confidence:** 0.6
-- **Root cause:** A URL embedded in source or configuration may contain credentials, internal-only hostnames, or other environment-specific detail that does not belong in code.
-- **Likely developer mistake:** Hardcoding an environment-specific or credentialed URL instead of building it from configuration/secrets at runtime.
-- **Security impact:** URLs containing embedded credentials or internal hostnames can leak access or aid reconnaissance if the repository is exposed.
-- **Recommended fix:** Review embedded URLs for credentials or internal-only endpoints; move environment-specific URLs into configuration.
-- **Security best practice:** Move environment-specific or credentialed URLs into configuration/secrets rather than hardcoding in source.
-- **OWASP:** OWASP A05:2021 - Security Misconfiguration
-- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A05_2021-Security_Misconfiguration/, https://cwe.mitre.org/data/definitions/200.html
-
-### F-000017 - URL [LOW]
-
-- **Location:** README.md:14
-- **Category:** Network Information
-- **Detection confidence:** 0.6
-- **Root cause:** A URL embedded in source or configuration may contain credentials, internal-only hostnames, or other environment-specific detail that does not belong in code.
-- **Likely developer mistake:** Hardcoding an environment-specific or credentialed URL instead of building it from configuration/secrets at runtime.
-- **Security impact:** URLs containing embedded credentials or internal hostnames can leak access or aid reconnaissance if the repository is exposed.
-- **Recommended fix:** Review embedded URLs for credentials or internal-only endpoints; move environment-specific URLs into configuration.
-- **Security best practice:** Move environment-specific or credentialed URLs into configuration/secrets rather than hardcoding in source.
-- **OWASP:** OWASP A05:2021 - Security Misconfiguration
-- **CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor
-- **References:** https://owasp.org/Top10/A05_2021-Security_Misconfiguration/, https://cwe.mitre.org/data/definitions/200.html
-
-...and 17 more finding(s). See `dashboard.json` for category-level aggregates or the full JSON report for every finding.
+...and 6 more finding(s). See `dashboard.json` for category-level aggregates or the full JSON report for every finding.
 
 ## Secure Coding Recommendations (by category)
 
+- **MEDICAL_LICENSE** (CRITICAL): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode medical license numbers; use synthetic practitioner data in tests.
+- **UK_NHS** (CRITICAL): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode health-system identifiers; use synthetic patient data in tests.
 - **PERSON** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Use synthetic names in code, comments, and test fixtures.
+- **IP_ADDRESS** (HIGH): OWASP A05:2021 - Security Misconfiguration / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Move environment-specific IP addresses into configuration or secrets management rather than hardcoding in source.
 - **EMAIL_ADDRESS** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.
+- **US_DRIVER_LICENSE** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode driver's license numbers; use synthetic identity documents in tests.
 - **ORGANIZATION** (MEDIUM): OWASP A01:2021 - Broken Access Control / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.
-- **URL** (LOW): OWASP A05:2021 - Security Misconfiguration / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Move environment-specific or credentialed URLs into configuration/secrets rather than hardcoding in source.

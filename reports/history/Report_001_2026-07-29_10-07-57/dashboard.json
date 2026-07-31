@@ -1,0 +1,249 @@
+{
+  "generated_at": "2026-07-29T04:37:57.932832+00:00",
+  "summary": {
+    "total_findings": 26,
+    "risk_score": 182,
+    "pipeline_status": "FAIL"
+  },
+  "category_counts": {
+    "Secrets": 0,
+    "Personal Information": 9,
+    "Financial Data": 0,
+    "Authentication": 0,
+    "Medical Data": 3,
+    "Government IDs": 6,
+    "Network Information": 2,
+    "Business Information": 6,
+    "Credentials": 0,
+    "Other": 0
+  },
+  "trend": {
+    "trend_available": false,
+    "message": "Trend analysis unavailable: no previous scan report was found. This is expected on the first scan; future scans will be compared against this one."
+  },
+  "top_files": [
+    {
+      "file": "tests\\test_defaults.py",
+      "finding_count": 7
+    },
+    {
+      "file": "docs\\utils.md",
+      "finding_count": 3
+    },
+    {
+      "file": "docs\\click-concepts.md",
+      "finding_count": 2
+    },
+    {
+      "file": "docs\\commands.md",
+      "finding_count": 2
+    },
+    {
+      "file": "tests\\test_basic.py",
+      "finding_count": 2
+    },
+    {
+      "file": "tests\\test_context.py",
+      "finding_count": 2
+    },
+    {
+      "file": "tests\\test_utils\\test_echo.py",
+      "finding_count": 2
+    },
+    {
+      "file": ".github\\workflows\\lock.yaml",
+      "finding_count": 1
+    },
+    {
+      "file": "docs\\contrib.md",
+      "finding_count": 1
+    },
+    {
+      "file": "docs\\standalone-apps.md",
+      "finding_count": 1
+    }
+  ],
+  "top_findings": [
+    {
+      "finding_id": "F-000000",
+      "file": ".github\\workflows\\lock.yaml",
+      "line_number": 22,
+      "entity_type": "MEDICAL_LICENSE",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-000011",
+      "file": "tests\\test_basic.py",
+      "line_number": 325,
+      "entity_type": "UK_NHS",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-000021",
+      "file": "tests\\test_defaults.py",
+      "line_number": 551,
+      "entity_type": "UK_NHS",
+      "severity": "CRITICAL"
+    },
+    {
+      "finding_id": "F-000001",
+      "file": "docs\\click-concepts.md",
+      "line_number": 32,
+      "entity_type": "PERSON",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000002",
+      "file": "docs\\click-concepts.md",
+      "line_number": 32,
+      "entity_type": "PERSON",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000003",
+      "file": "docs\\commands.md",
+      "line_number": 334,
+      "entity_type": "IP_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000004",
+      "file": "docs\\commands.md",
+      "line_number": 411,
+      "entity_type": "IP_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000006",
+      "file": "docs\\standalone-apps.md",
+      "line_number": 69,
+      "entity_type": "EMAIL_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000008",
+      "file": "docs\\utils.md",
+      "line_number": 26,
+      "entity_type": "US_DRIVER_LICENSE",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000009",
+      "file": "docs\\utils.md",
+      "line_number": 26,
+      "entity_type": "US_DRIVER_LICENSE",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000012",
+      "file": "tests\\test_basic.py",
+      "line_number": 253,
+      "entity_type": "US_DRIVER_LICENSE",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000015",
+      "file": "tests\\test_defaults.py",
+      "line_number": 174,
+      "entity_type": "EMAIL_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000016",
+      "file": "tests\\test_defaults.py",
+      "line_number": 174,
+      "entity_type": "EMAIL_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000017",
+      "file": "tests\\test_defaults.py",
+      "line_number": 176,
+      "entity_type": "EMAIL_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000018",
+      "file": "tests\\test_defaults.py",
+      "line_number": 452,
+      "entity_type": "EMAIL_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000019",
+      "file": "tests\\test_defaults.py",
+      "line_number": 457,
+      "entity_type": "EMAIL_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000020",
+      "file": "tests\\test_defaults.py",
+      "line_number": 463,
+      "entity_type": "EMAIL_ADDRESS",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000022",
+      "file": "tests\\test_options.py",
+      "line_number": 825,
+      "entity_type": "US_DRIVER_LICENSE",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000024",
+      "file": "tests\\test_utils\\test_echo.py",
+      "line_number": 15,
+      "entity_type": "US_DRIVER_LICENSE",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000025",
+      "file": "tests\\test_utils\\test_echo.py",
+      "line_number": 15,
+      "entity_type": "US_DRIVER_LICENSE",
+      "severity": "HIGH"
+    },
+    {
+      "finding_id": "F-000005",
+      "file": "docs\\contrib.md",
+      "line_number": 26,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
+    },
+    {
+      "finding_id": "F-000007",
+      "file": "docs\\utils.md",
+      "line_number": 26,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
+    },
+    {
+      "finding_id": "F-000010",
+      "file": "src\\click\\utils.py",
+      "line_number": 581,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
+    },
+    {
+      "finding_id": "F-000013",
+      "file": "tests\\test_context.py",
+      "line_number": 308,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
+    },
+    {
+      "finding_id": "F-000014",
+      "file": "tests\\test_context.py",
+      "line_number": 314,
+      "entity_type": "ORGANIZATION",
+      "severity": "MEDIUM"
+    }
+  ],
+  "severity_distribution": {
+    "LOW": 0,
+    "MEDIUM": 6,
+    "HIGH": 17,
+    "CRITICAL": 3
+  }
+}

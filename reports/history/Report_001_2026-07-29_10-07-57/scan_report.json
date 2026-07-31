@@ -1,0 +1,267 @@
+{
+  "schema_version": "1.0",
+  "scanner_version": "0.4.0",
+  "repository": {
+    "identifier": "https://github.com/pallets/click.git",
+    "source_type": "GITLAB_REMOTE",
+    "local_path": "D:\\gitlab-pii-scanner\\output\\cloned_repositories\\click-90e79e2b"
+  },
+  "scan": {
+    "started_at": "2026-07-29T04:37:19.082803+00:00",
+    "finished_at": "2026-07-29T04:37:57.898383+00:00",
+    "duration_seconds": 38.81558,
+    "files_scanned": 132,
+    "files_skipped": 0
+  },
+  "summary": {
+    "total_findings": 26,
+    "severity_counts": {
+      "LOW": 0,
+      "MEDIUM": 6,
+      "HIGH": 17,
+      "CRITICAL": 3
+    },
+    "risk_score": 182,
+    "pipeline_status": "FAIL",
+    "risk_thresholds": {
+      "warning": 20,
+      "fail": 50
+    }
+  },
+  "findings": [
+    {
+      "file": ".github\\workflows\\lock.yaml",
+      "line_number": 22,
+      "entity_type": "MEDICAL_LICENSE",
+      "confidence_score": 1.0,
+      "severity": "CRITICAL",
+      "matched_value": "*****1296",
+      "redacted": true
+    },
+    {
+      "file": "docs\\click-concepts.md",
+      "line_number": 32,
+      "entity_type": "PERSON",
+      "confidence_score": 0.85,
+      "severity": "HIGH",
+      "matched_value": "*-bar",
+      "redacted": true
+    },
+    {
+      "file": "docs\\click-concepts.md",
+      "line_number": 32,
+      "entity_type": "PERSON",
+      "confidence_score": 0.85,
+      "severity": "HIGH",
+      "matched_value": "*-bar",
+      "redacted": true
+    },
+    {
+      "file": "docs\\commands.md",
+      "line_number": 334,
+      "entity_type": "IP_ADDRESS",
+      "confidence_score": 0.6,
+      "severity": "HIGH",
+      "matched_value": "*****.0.1",
+      "redacted": true
+    },
+    {
+      "file": "docs\\commands.md",
+      "line_number": 411,
+      "entity_type": "IP_ADDRESS",
+      "confidence_score": 0.6,
+      "severity": "HIGH",
+      "matched_value": "*****.0.1",
+      "redacted": true
+    },
+    {
+      "file": "docs\\contrib.md",
+      "line_number": 26,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "*****************************************************   |",
+      "redacted": true
+    },
+    {
+      "file": "docs\\standalone-apps.md",
+      "line_number": 69,
+      "entity_type": "EMAIL_ADDRESS",
+      "confidence_score": 1.0,
+      "severity": "HIGH",
+      "matched_value": "yo***@example.com",
+      "redacted": true
+    },
+    {
+      "file": "docs\\utils.md",
+      "line_number": 26,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "**",
+      "redacted": true
+    },
+    {
+      "file": "docs\\utils.md",
+      "line_number": 26,
+      "entity_type": "US_DRIVER_LICENSE",
+      "confidence_score": 0.65,
+      "severity": "HIGH",
+      "matched_value": "***",
+      "redacted": true
+    },
+    {
+      "file": "docs\\utils.md",
+      "line_number": 26,
+      "entity_type": "US_DRIVER_LICENSE",
+      "confidence_score": 0.65,
+      "severity": "HIGH",
+      "matched_value": "***",
+      "redacted": true
+    },
+    {
+      "file": "src\\click\\utils.py",
+      "line_number": 581,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "****zeug",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_basic.py",
+      "line_number": 325,
+      "entity_type": "UK_NHS",
+      "confidence_score": 1.0,
+      "severity": "CRITICAL",
+      "matched_value": "******6668",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_basic.py",
+      "line_number": 253,
+      "entity_type": "US_DRIVER_LICENSE",
+      "confidence_score": 0.65,
+      "severity": "HIGH",
+      "matched_value": "****2011",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_context.py",
+      "line_number": 308,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "******rnal",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_context.py",
+      "line_number": 314,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "******rnal",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_defaults.py",
+      "line_number": 174,
+      "entity_type": "EMAIL_ADDRESS",
+      "confidence_score": 1.0,
+      "severity": "HIGH",
+      "matched_value": "a***@b.com",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_defaults.py",
+      "line_number": 174,
+      "entity_type": "EMAIL_ADDRESS",
+      "confidence_score": 1.0,
+      "severity": "HIGH",
+      "matched_value": "a***@b.com",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_defaults.py",
+      "line_number": 176,
+      "entity_type": "EMAIL_ADDRESS",
+      "confidence_score": 1.0,
+      "severity": "HIGH",
+      "matched_value": "a***@b.com",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_defaults.py",
+      "line_number": 452,
+      "entity_type": "EMAIL_ADDRESS",
+      "confidence_score": 1.0,
+      "severity": "HIGH",
+      "matched_value": "pr***@example.com",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_defaults.py",
+      "line_number": 457,
+      "entity_type": "EMAIL_ADDRESS",
+      "confidence_score": 1.0,
+      "severity": "HIGH",
+      "matched_value": "ap***@example.com",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_defaults.py",
+      "line_number": 463,
+      "entity_type": "EMAIL_ADDRESS",
+      "confidence_score": 1.0,
+      "severity": "HIGH",
+      "matched_value": "pr***@example.com",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_defaults.py",
+      "line_number": 551,
+      "entity_type": "UK_NHS",
+      "confidence_score": 1.0,
+      "severity": "CRITICAL",
+      "matched_value": "******3305",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_options.py",
+      "line_number": 825,
+      "entity_type": "US_DRIVER_LICENSE",
+      "confidence_score": 0.65,
+      "severity": "HIGH",
+      "matched_value": "***",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_termui.py",
+      "line_number": 1408,
+      "entity_type": "ORGANIZATION",
+      "confidence_score": 0.85,
+      "severity": "MEDIUM",
+      "matched_value": "*aram",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_utils\\test_echo.py",
+      "line_number": 15,
+      "entity_type": "US_DRIVER_LICENSE",
+      "confidence_score": 0.65,
+      "severity": "HIGH",
+      "matched_value": "***",
+      "redacted": true
+    },
+    {
+      "file": "tests\\test_utils\\test_echo.py",
+      "line_number": 15,
+      "entity_type": "US_DRIVER_LICENSE",
+      "confidence_score": 0.65,
+      "severity": "HIGH",
+      "matched_value": "***",
+      "redacted": true
+    }
+  ]
+}

@@ -23,6 +23,7 @@ from typing import TYPE_CHECKING, List
 
 from scanner.config import ScannerSettings
 from scanner.logger import get_logger
+from scanner.detection_validator import DetectionContext, DetectionValidator
 from scanner.models import PIIFinding, ScannedFile, Severity
 
 if TYPE_CHECKING:  # pragma: no cover - import only used for type hints
@@ -108,6 +109,7 @@ class PIIDetector:
         self,
         settings: ScannerSettings,
         analyzer_engine: "AnalyzerEngine | None" = None,
+        detection_validator: DetectionValidator | None = None,
     ) -> None:
         """
         Args:
@@ -116,9 +118,13 @@ class PIIDetector:
             analyzer_engine: Optional pre-built `AnalyzerEngine`. Tests
                 inject a fake/stub here to avoid loading a real NLP
                 model; production code lets this build the default engine.
+            detection_validator: Optional validation pipeline for raw
+                recognizer output. Tests may inject one; production uses
+                the deterministic repository-aware validator.
         """
         self._settings = settings
         self._engine = analyzer_engine or self._build_default_engine(settings)
+        self._validator = detection_validator or DetectionValidator()
 
     @staticmethod
     def _build_default_engine(settings: ScannerSettings) -> "AnalyzerEngine":
@@ -193,6 +199,17 @@ class PIIDetector:
         findings: List[PIIFinding] = []
         for result in results:
             if result.score < self._settings.presidio_min_confidence:
+                continue
+            context = DetectionContext(
+                relative_path=scanned_file.relative_path,
+                extension=scanned_file.extension,
+                text=text,
+                start=result.start,
+                end=result.end,
+                entity_type=result.entity_type,
+                score=result.score,
+            )
+            if not self._validator.should_keep(context):
                 continue
             findings.append(
                 PIIFinding(

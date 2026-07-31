@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PII Security Dashboard</title>
+  <style>
+:root{--bg:#f4f7fb;--surface:#fff;--ink:#172033;--muted:#637083;--line:#d9e1ec;--accent:#2563eb;--pass:#15803d;--warn:#b45309;--fail:#b91c1c}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Segoe UI,Arial,sans-serif}main{max-width:1180px;margin:0 auto;padding:28px}
+.hero{display:flex;justify-content:space-between;gap:24px;align-items:center;background:linear-gradient(135deg,#152238,#244a77);color:#fff;border-radius:8px;padding:34px;margin-bottom:18px}.hero.compact{padding:26px}.eyebrow{text-transform:uppercase;letter-spacing:.08em;font-size:12px;color:#b9d4ff;margin:0 0 10px}h1{font-size:34px;margin:0 0 10px}h2{margin:0 0 16px;font-size:20px}h3{margin:8px 0 10px}.scorecard{text-align:center;min-width:170px}.scorecard strong{display:block;font-size:54px;line-height:1}.badge{display:inline-block;border-radius:999px;padding:8px 14px;font-weight:700;background:#64748b;color:#fff}.badge.pass,.release.pass h3{background:var(--pass)}.badge.warning,.release.warning h3{background:var(--warn)}.badge.fail,.release.fail h3{background:var(--fail)}
+.links{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 18px}.links a,.panel a{color:#1d4ed8;font-weight:700;text-decoration:none}.links a{background:#fff;border:1px solid var(--line);border-radius:8px;padding:10px 12px}.assessment{background:#ecfdf5;border:1px solid #bbf7d0;border-radius:8px;padding:22px;margin-bottom:18px}.assessment p{font-size:17px;line-height:1.55}.meta,.metrics,.grid{display:grid;gap:14px;margin-bottom:18px}.meta{grid-template-columns:repeat(4,1fr)}.metrics{grid-template-columns:repeat(7,1fr)}.metrics.trend{grid-template-columns:repeat(6,1fr)}.grid{grid-template-columns:repeat(2,1fr)}.meta div,.metric,.panel,.release{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;box-shadow:0 1px 2px rgba(15,23,42,.04)}.meta span,.metric span{display:block;color:var(--muted);font-size:13px}.metric strong{font-size:28px}.metric small{display:block;margin-top:8px;color:var(--muted);line-height:1.4}.wide{grid-column:span 2}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid var(--line);padding:10px;text-align:left;vertical-align:top}th{font-size:12px;text-transform:uppercase;color:var(--muted)}canvas{width:100%;height:260px}pre{white-space:pre-wrap;background:#f8fafc;border:1px solid var(--line);padding:12px;border-radius:6px}.release h3{display:inline-block;color:#fff;border-radius:6px;padding:8px 12px}.release p{font-size:16px}.report-list{display:grid;gap:10px;padding-left:18px}.report-list .badge{margin-left:8px;padding:4px 8px;font-size:12px}
+@media(max-width:850px){main{padding:16px}.hero{display:block}.meta,.metrics,.grid{grid-template-columns:1fr}.scorecard{text-align:left;margin-top:20px}}
+</style>
+</head>
+<body>
+  <main>
+<section class="hero compact">
+  <div><p class="eyebrow">Operational Dashboard</p><h1>PII Security Dashboard</h1><p>Status: FAIL</p></div>
+  <div class="scorecard"><span class="badge fail">FAIL</span><strong>182</strong><span>Risk Score</span></div>
+</section>
+<nav class="links"><a href="Executive_Report.html">Open Executive Report</a><a href="../index.html">Back to Index</a></nav>
+<section class="metrics">
+  <div class="metric"><span>Total Findings</span><strong>26</strong></div>
+  <div class="metric"><span>Risk Score</span><strong>182</strong></div>
+  <div class="metric"><span>Pipeline Status</span><strong>FAIL</strong></div>
+  <div class="metric"><span>Files Scanned</span><strong>132</strong></div>
+  <div class="metric"><span>Duration</span><strong>38s</strong></div>
+  <div class="metric"><span>Generated</span><strong>29 July 2026<br>04:37 AM UTC</strong></div>
+</section>
+<section class="metrics trend"><div class="metric wide"><span>Trend</span><strong>No Change</strong><small>Trend analysis unavailable: no previous scan report was found. This is expected on the first scan; future scans will be compared against this one.</small></div></section>
+<section class="grid">
+  <div class="panel"><h2>Severity</h2><canvas id="severityChart"></canvas></div>
+  <div class="panel"><h2>Categories</h2><canvas id="categoryChart"></canvas></div>
+</section>
+<section class="grid">
+  <div class="panel"><h2>Top Files</h2><canvas id="topFilesChart"></canvas></div>
+  <div class="panel"><h2>Recent Reports</h2><ul class="report-list"><li><a href="../history/Report_001_2026-07-29_10-07-57/Executive_Report.html">Report_001_2026-07-29_10-07-57</a> <span class="badge fail">FAIL</span></li></ul></div>
+</section>
+<section class="panel"><h2>Developer Guidance</h2><h2>Developer Guidance Report</h2>
+<h3>Executive Summary</h3>
+<p>This developer guidance report accompanies the PII scan of https://github.com/pallets/click.git. It explains, for each detected issue, why it was flagged and how to fix it -- the risk score and pipeline status themselves are decided exclusively by the deterministic risk engine and are reproduced here for reference only.</p>
+<h3>Risk Score &amp; Overall Severity</h3>
+<ul>
+<li>**Risk score:** 182 (warning &gt;= 20, fail &gt;= 50)</li>
+<li>**Pipeline status:** FAIL</li>
+<li>**Total findings:** 26</li>
+<li>**Overall severity breakdown:**</li>
+<li>Critical: 3</li>
+<li>High: 17</li>
+<li>Medium: 6</li>
+</ul>
+<h3>Detected Issues, Root Cause &amp; Recommended Fix</h3>
+<p>### F-000000 - MEDICAL_LICENSE [CRITICAL]</p>
+<ul>
+<li>**Location:** .github\workflows\lock.yaml:22</li>
+<li>**Category:** Medical Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A medical license number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real practitioner&#x27;s license number in a fixture instead of a synthetic value.</li>
+<li>**Security impact:** Exposure can support impersonation of a licensed medical professional or fraudulent billing.</li>
+<li>**Recommended fix:** Remove hardcoded medical license numbers and replace with synthetic test data.</li>
+<li>**Security best practice:** Never hardcode medical license numbers; use synthetic practitioner data in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000011 - UK_NHS [CRITICAL]</p>
+<ul>
+<li>**Location:** tests\test_basic.py:325</li>
+<li>**Category:** Medical Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A UK National Health Service number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real patient record for local testing instead of synthetic health data.</li>
+<li>**Security impact:** NHS numbers link directly to an individual&#x27;s medical history; exposure is a health-data (special category) privacy incident.</li>
+<li>**Recommended fix:** Remove hardcoded NHS numbers and replace with synthetic test data; treat as sensitive health-related identifier.</li>
+<li>**Security best practice:** Never hardcode health-system identifiers; use synthetic patient data in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000021 - UK_NHS [CRITICAL]</p>
+<ul>
+<li>**Location:** tests\test_defaults.py:551</li>
+<li>**Category:** Medical Data</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A UK National Health Service number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real patient record for local testing instead of synthetic health data.</li>
+<li>**Security impact:** NHS numbers link directly to an individual&#x27;s medical history; exposure is a health-data (special category) privacy incident.</li>
+<li>**Recommended fix:** Remove hardcoded NHS numbers and replace with synthetic test data; treat as sensitive health-related identifier.</li>
+<li>**Security best practice:** Never hardcode health-system identifiers; use synthetic patient data in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000001 - PERSON [HIGH]</p>
+<ul>
+<li>**Location:** docs\click-concepts.md:32</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 0.85</li>
+<li>**Root cause:** A real person&#x27;s name was left in source code, comments, fixtures, or logs instead of a synthetic placeholder.</li>
+<li>**Likely developer mistake:** Using a real customer&#x27;s or colleague&#x27;s name in an example, test fixture, or code comment.</li>
+<li>**Security impact:** Real names, especially combined with other findings (email, phone, location), increase re-identification risk.</li>
+<li>**Recommended fix:** Replace real customer/employee names in code, comments, and test fixtures with synthetic test data.</li>
+<li>**Security best practice:** Use synthetic names in code, comments, and test fixtures.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000002 - PERSON [HIGH]</p>
+<ul>
+<li>**Location:** docs\click-concepts.md:32</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 0.85</li>
+<li>**Root cause:** A real person&#x27;s name was left in source code, comments, fixtures, or logs instead of a synthetic placeholder.</li>
+<li>**Likely developer mistake:** Using a real customer&#x27;s or colleague&#x27;s name in an example, test fixture, or code comment.</li>
+<li>**Security impact:** Real names, especially combined with other findings (email, phone, location), increase re-identification risk.</li>
+<li>**Recommended fix:** Replace real customer/employee names in code, comments, and test fixtures with synthetic test data.</li>
+<li>**Security best practice:** Use synthetic names in code, comments, and test fixtures.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000003 - IP_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** docs\commands.md:334</li>
+<li>**Category:** Network Information</li>
+<li>**Detection confidence:** 0.6</li>
+<li>**Root cause:** An IP address was hardcoded into source or configuration instead of being read from environment-specific config.</li>
+<li>**Likely developer mistake:** Hardcoding a real internal or customer-facing IP address while debugging network connectivity.</li>
+<li>**Security impact:** Hardcoded internal IPs can reveal network topology to anyone with repository access, aiding reconnaissance.</li>
+<li>**Recommended fix:** Replace real IP addresses in code/config with placeholder or documentation-reserved ranges; move any environment-specific addresses into configuration/secrets rather than source.</li>
+<li>**Security best practice:** Move environment-specific IP addresses into configuration or secrets management rather than hardcoding in source.</li>
+<li>**OWASP:** OWASP A05:2021 - Security Misconfiguration</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A05_2021-Security_Misconfiguration/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000004 - IP_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** docs\commands.md:411</li>
+<li>**Category:** Network Information</li>
+<li>**Detection confidence:** 0.6</li>
+<li>**Root cause:** An IP address was hardcoded into source or configuration instead of being read from environment-specific config.</li>
+<li>**Likely developer mistake:** Hardcoding a real internal or customer-facing IP address while debugging network connectivity.</li>
+<li>**Security impact:** Hardcoded internal IPs can reveal network topology to anyone with repository access, aiding reconnaissance.</li>
+<li>**Recommended fix:** Replace real IP addresses in code/config with placeholder or documentation-reserved ranges; move any environment-specific addresses into configuration/secrets rather than source.</li>
+<li>**Security best practice:** Move environment-specific IP addresses into configuration or secrets management rather than hardcoding in source.</li>
+<li>**OWASP:** OWASP A05:2021 - Security Misconfiguration</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A05_2021-Security_Misconfiguration/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000006 - EMAIL_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** docs\standalone-apps.md:69</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.</li>
+<li>**Likely developer mistake:** Copy-pasting a real user&#x27;s email address into a test fixture, example, or debug log statement.</li>
+<li>**Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.</li>
+<li>**Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).</li>
+<li>**Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000008 - US_DRIVER_LICENSE [HIGH]</p>
+<ul>
+<li>**Location:** docs\utils.md:26</li>
+<li>**Category:** Government IDs</li>
+<li>**Detection confidence:** 0.65</li>
+<li>**Root cause:** A U.S. driver&#x27;s license number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real individual&#x27;s license number for identity verification test fixtures.</li>
+<li>**Security impact:** Driver&#x27;s license numbers are a common secondary identity document used in identity-theft and fraud schemes.</li>
+<li>**Recommended fix:** Remove hardcoded driver&#x27;s license numbers and replace with synthetic test data.</li>
+<li>**Security best practice:** Never hardcode driver&#x27;s license numbers; use synthetic identity documents in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000009 - US_DRIVER_LICENSE [HIGH]</p>
+<ul>
+<li>**Location:** docs\utils.md:26</li>
+<li>**Category:** Government IDs</li>
+<li>**Detection confidence:** 0.65</li>
+<li>**Root cause:** A U.S. driver&#x27;s license number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real individual&#x27;s license number for identity verification test fixtures.</li>
+<li>**Security impact:** Driver&#x27;s license numbers are a common secondary identity document used in identity-theft and fraud schemes.</li>
+<li>**Recommended fix:** Remove hardcoded driver&#x27;s license numbers and replace with synthetic test data.</li>
+<li>**Security best practice:** Never hardcode driver&#x27;s license numbers; use synthetic identity documents in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000012 - US_DRIVER_LICENSE [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_basic.py:253</li>
+<li>**Category:** Government IDs</li>
+<li>**Detection confidence:** 0.65</li>
+<li>**Root cause:** A U.S. driver&#x27;s license number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real individual&#x27;s license number for identity verification test fixtures.</li>
+<li>**Security impact:** Driver&#x27;s license numbers are a common secondary identity document used in identity-theft and fraud schemes.</li>
+<li>**Recommended fix:** Remove hardcoded driver&#x27;s license numbers and replace with synthetic test data.</li>
+<li>**Security best practice:** Never hardcode driver&#x27;s license numbers; use synthetic identity documents in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000015 - EMAIL_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_defaults.py:174</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.</li>
+<li>**Likely developer mistake:** Copy-pasting a real user&#x27;s email address into a test fixture, example, or debug log statement.</li>
+<li>**Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.</li>
+<li>**Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).</li>
+<li>**Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000016 - EMAIL_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_defaults.py:174</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.</li>
+<li>**Likely developer mistake:** Copy-pasting a real user&#x27;s email address into a test fixture, example, or debug log statement.</li>
+<li>**Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.</li>
+<li>**Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).</li>
+<li>**Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000017 - EMAIL_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_defaults.py:176</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.</li>
+<li>**Likely developer mistake:** Copy-pasting a real user&#x27;s email address into a test fixture, example, or debug log statement.</li>
+<li>**Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.</li>
+<li>**Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).</li>
+<li>**Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000018 - EMAIL_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_defaults.py:452</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.</li>
+<li>**Likely developer mistake:** Copy-pasting a real user&#x27;s email address into a test fixture, example, or debug log statement.</li>
+<li>**Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.</li>
+<li>**Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).</li>
+<li>**Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000019 - EMAIL_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_defaults.py:457</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.</li>
+<li>**Likely developer mistake:** Copy-pasting a real user&#x27;s email address into a test fixture, example, or debug log statement.</li>
+<li>**Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.</li>
+<li>**Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).</li>
+<li>**Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000020 - EMAIL_ADDRESS [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_defaults.py:463</li>
+<li>**Category:** Personal Information</li>
+<li>**Detection confidence:** 1.0</li>
+<li>**Root cause:** A real email address was left in source code, comments, fixtures, or logs instead of a synthetic example address.</li>
+<li>**Likely developer mistake:** Copy-pasting a real user&#x27;s email address into a test fixture, example, or debug log statement.</li>
+<li>**Security impact:** Exposed email addresses enable targeted phishing and, when combined with other findings, can support account enumeration.</li>
+<li>**Recommended fix:** Replace real email addresses in code, fixtures, and test data with synthetic example addresses (e.g. user@example.com).</li>
+<li>**Security best practice:** Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-200: Exposure of Sensitive Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/200.html</li>
+</ul>
+<p>### F-000022 - US_DRIVER_LICENSE [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_options.py:825</li>
+<li>**Category:** Government IDs</li>
+<li>**Detection confidence:** 0.65</li>
+<li>**Root cause:** A U.S. driver&#x27;s license number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real individual&#x27;s license number for identity verification test fixtures.</li>
+<li>**Security impact:** Driver&#x27;s license numbers are a common secondary identity document used in identity-theft and fraud schemes.</li>
+<li>**Recommended fix:** Remove hardcoded driver&#x27;s license numbers and replace with synthetic test data.</li>
+<li>**Security best practice:** Never hardcode driver&#x27;s license numbers; use synthetic identity documents in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000024 - US_DRIVER_LICENSE [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_utils\test_echo.py:15</li>
+<li>**Category:** Government IDs</li>
+<li>**Detection confidence:** 0.65</li>
+<li>**Root cause:** A U.S. driver&#x27;s license number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real individual&#x27;s license number for identity verification test fixtures.</li>
+<li>**Security impact:** Driver&#x27;s license numbers are a common secondary identity document used in identity-theft and fraud schemes.</li>
+<li>**Recommended fix:** Remove hardcoded driver&#x27;s license numbers and replace with synthetic test data.</li>
+<li>**Security best practice:** Never hardcode driver&#x27;s license numbers; use synthetic identity documents in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>### F-000025 - US_DRIVER_LICENSE [HIGH]</p>
+<ul>
+<li>**Location:** tests\test_utils\test_echo.py:15</li>
+<li>**Category:** Government IDs</li>
+<li>**Detection confidence:** 0.65</li>
+<li>**Root cause:** A U.S. driver&#x27;s license number was committed directly into source or test data.</li>
+<li>**Likely developer mistake:** Reusing a real individual&#x27;s license number for identity verification test fixtures.</li>
+<li>**Security impact:** Driver&#x27;s license numbers are a common secondary identity document used in identity-theft and fraud schemes.</li>
+<li>**Recommended fix:** Remove hardcoded driver&#x27;s license numbers and replace with synthetic test data.</li>
+<li>**Security best practice:** Never hardcode driver&#x27;s license numbers; use synthetic identity documents in tests.</li>
+<li>**OWASP:** OWASP A01:2021 - Broken Access Control</li>
+<li>**CWE:** CWE-359: Exposure of Private Personal Information to an Unauthorized Actor</li>
+<li>**References:** https://owasp.org/Top10/A01_2021-Broken_Access_Control/, https://cwe.mitre.org/data/definitions/359.html</li>
+</ul>
+<p>...and 6 more finding(s). See `dashboard.json` for category-level aggregates or the full JSON report for every finding.</p>
+<h3>Secure Coding Recommendations (by category)</h3>
+<ul>
+<li>**MEDICAL_LICENSE** (CRITICAL): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode medical license numbers; use synthetic practitioner data in tests.</li>
+<li>**UK_NHS** (CRITICAL): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode health-system identifiers; use synthetic patient data in tests.</li>
+<li>**PERSON** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Use synthetic names in code, comments, and test fixtures.</li>
+<li>**IP_ADDRESS** (HIGH): OWASP A05:2021 - Security Misconfiguration / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Move environment-specific IP addresses into configuration or secrets management rather than hardcoding in source.</li>
+<li>**EMAIL_ADDRESS** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Use synthetic example addresses (e.g. user@example.com) in code, fixtures, and documentation.</li>
+<li>**US_DRIVER_LICENSE** (HIGH): OWASP A01:2021 - Broken Access Control / CWE-359: Exposure of Private Personal Information to an Unauthorized Actor -- Never hardcode driver&#x27;s license numbers; use synthetic identity documents in tests.</li>
+<li>**ORGANIZATION** (MEDIUM): OWASP A01:2021 - Broken Access Control / CWE-200: Exposure of Sensitive Information to an Unauthorized Actor -- Avoid committing confidential customer, partner, vendor, supplier, or internal project names; use synthetic organization names in source, documentation, logs, and test datasets unless the names are intentionally public.</li>
+</ul></section>
+<script>const reportData = {"severity": {"CRITICAL": 3, "HIGH": 17, "MEDIUM": 6, "LOW": 0}, "categories": {"Secrets": 0, "Personal Information": 9, "Financial Data": 0, "Authentication": 0, "Medical Data": 3, "Government IDs": 6, "Network Information": 2, "Business Information": 6, "Credentials": 0, "Other": 0}, "topCategories": {"Personal Information": 9, "Government IDs": 6, "Business Information": 6, "Medical Data": 3, "Network Information": 2}, "topFiles": {"tests\\test_defaults.py": 7, "docs\\utils.md": 3, "docs\\click-concepts.md": 2, "docs\\commands.md": 2, "tests\\test_basic.py": 2, "tests\\test_context.py": 2, "tests\\test_utils\\test_echo.py": 2, ".github\\workflows\\lock.yaml": 1, "docs\\contrib.md": 1, "docs\\standalone-apps.md": 1}}; renderCharts(reportData);</script>
+</main>
+  <script>
+function palette(i){return ['#dc2626','#ea580c','#ca8a04','#2563eb','#0891b2','#7c3aed','#16a34a','#64748b'][i%8];}
+function drawBar(canvas, data){const ctx=canvas.getContext('2d'), labels=Object.keys(data), vals=Object.values(data);const w=canvas.width=canvas.clientWidth*2,h=canvas.height=canvas.clientHeight*2,max=Math.max(...vals,1);ctx.scale(2,2);ctx.clearRect(0,0,w,h);labels.forEach((label,i)=>{const y=28+i*32,bw=(canvas.clientWidth-170)*(vals[i]/max);ctx.fillStyle=palette(i);ctx.fillRect(140,y,bw,18);ctx.fillStyle='#172033';ctx.font='12px Segoe UI';ctx.fillText(label,8,y+14);ctx.fillText(vals[i],145+bw,y+14);});}
+function drawDonut(canvas, data){const ctx=canvas.getContext('2d'), entries=Object.entries(data).filter(([,v])=>v>0);const w=canvas.width=canvas.clientWidth*2,h=canvas.height=canvas.clientHeight*2,cx=w/4,cy=h/4,r=Math.min(cx,cy)-20,total=entries.reduce((s,e)=>s+e[1],0)||1;ctx.scale(2,2);let a=-Math.PI/2;entries.forEach(([label,v],i)=>{const next=a+Math.PI*2*(v/total);ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,a,next);ctx.closePath();ctx.fillStyle=palette(i);ctx.fill();a=next;ctx.fillStyle='#172033';ctx.font='12px Segoe UI';ctx.fillText(label+' '+v,cx+r+24,34+i*20);});ctx.beginPath();ctx.arc(cx,cy,r*.55,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();}
+function renderCharts(d){const sev=document.getElementById('severityChart'), cat=document.getElementById('categoryChart'), topCat=document.getElementById('topCategoryChart'), topFiles=document.getElementById('topFilesChart');if(sev)drawDonut(sev,d.severity||{});if(cat)drawDonut(cat,d.categories||{});if(topCat)drawBar(topCat,d.topCategories||{});if(topFiles)drawBar(topFiles,d.topFiles||{});}
+document.querySelectorAll('a[href="../index.html"]').forEach(a=>{if(location.pathname.includes('/history/'))a.href='../../index.html';});
+</script>
+</body>
+</html>
